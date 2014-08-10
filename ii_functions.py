@@ -8,6 +8,7 @@ adress=config["adress"]
 echoareas=config["echoareas"]
 authstr=config["authstr"]
 editor=config["editor"]
+xtenable=config["xtenable"]
 
 def applyBlackList(str):
 	return str
