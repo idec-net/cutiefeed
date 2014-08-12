@@ -3,6 +3,7 @@
 from Tkinter import *
 import tkMessageBox
 import locale
+import ttk
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 from ii_functions import *
@@ -66,20 +67,22 @@ def answer(event):
 def mainwindow():
 	global buttonsframe,root,canvas
 	root=Tk()
+	ttk.Style().theme_use("clam")
+	
 	root.title("Список эх")
 	root.minsize(200,100)
 	
-	frame1=Frame(root, relief=GROOVE)
+	frame1=ttk.Frame(root, relief=GROOVE)
 	canvas=Canvas(frame1)
-	buttonsframe=Frame(canvas)
+	buttonsframe=ttk.Frame(canvas)
 
-	getbutton=Button(buttonsframe,text="Получить сообщения")
+	getbutton=ttk.Button(buttonsframe,text="Получить сообщения")
 	getbutton.pack(side='top')
 	getbutton.bind("<Button-1>",getNewMessages)
 
 	for i in range(0,len(echoareas)):
 		exc("global but"+str(i)+"""
-but"""+str(i)+"=Button(buttonsframe,text='"+echoareas[i]+"')"+"""
+but"""+str(i)+"=ttk.Button(buttonsframe,text='"+echoareas[i]+"')"+"""
 def callb"""+str(i)+"(event):"+"""
 	global root"""+"""
 	root.destroy()"""+"""
@@ -87,7 +90,7 @@ def callb"""+str(i)+"(event):"+"""
 but"""+str(i)+".bind('<Button-1>',callb"+str(i)+""")
 but"""+str(i)+".pack()")
 	buttonsframe.pack(fill='both', expand=True)
-	scroll=Scrollbar(frame1, command=canvas.yview)
+	scroll=ttk.Scrollbar(frame1, command=canvas.yview)
 	canvas.configure(yscrollcommand=scroll.set)
 	canvas.pack(side='left', fill='both', expand=True)
 
@@ -102,6 +105,7 @@ but"""+str(i)+".pack()")
 def viewwindow(echo):
 	global root,lb,msglist,txt,msgnumber,listlen,echoarea
 	root=Tk()
+	ttk.Style().theme_use("clam")
 	echoarea=echo
 
 	root.title(echo)
@@ -113,21 +117,21 @@ def viewwindow(echo):
 	msgnumber=0
 	listlen=len(msglist)-2
 
-	lbframe=Frame(root)
-	topframe=Frame(root)
-	txtframe=Frame(root)
+	lbframe=ttk.Frame(root)
+	topframe=ttk.Frame(root)
+	txtframe=ttk.Frame(root)
 
 	lbframe.pack(side='left', fill='both', expand=True)
 	topframe.pack(side='top')
 	txtframe.pack(side='right', fill='both', expand=True)
 	
-	button1=Button(topframe,text="<")
-	button2=Button(topframe,text=">")
-	back=Button(topframe,text="К списку эх")
-	loadbut=Button(topframe,text="Скачать сообщения")
-	newbut=Button(topframe,text="Новое")
-	answframe=Button(topframe,text="Ответить")
-	sendframe=Button(topframe,text="Отправить сообщения")
+	button1=ttk.Button(topframe,text="<")
+	button2=ttk.Button(topframe,text=">")
+	back=ttk.Button(topframe,text="К списку эх")
+	loadbut=ttk.Button(topframe,text="Скачать сообщения")
+	newbut=ttk.Button(topframe,text="Новое")
+	answframe=ttk.Button(topframe,text="Ответить")
+	sendframe=ttk.Button(topframe,text="Отправить сообщения")
 
 	button1.bind("<Button-1>",msgminus)
 	button2.bind("<Button-1>",msgplus)
@@ -156,10 +160,10 @@ def viewwindow(echo):
 	txt=Text(txtframe,wrap=WORD)
 	updatemsg()
 	
-	scroll1=Scrollbar(txtframe)
+	scroll1=ttk.Scrollbar(txtframe)
 	scroll1.pack(side=RIGHT, fill=Y)
 	
-	scroll2=Scrollbar(lbframe)
+	scroll2=ttk.Scrollbar(lbframe)
 	scroll2.pack(side=RIGHT, fill=Y)
 	
 	txt.config(yscrollcommand=scroll1.set)
@@ -175,19 +179,20 @@ def viewwindow(echo):
 def getDialog():
 	global root
 	root=Tk()
+	ttk.Style().theme_use("clam")
 	root.title("Получение сообщений")
 	root.minsize(200,100)
 
-	butframe=Frame(root)
-	txtframe=Frame(root)
+	butframe=ttk.Frame(root)
+	txtframe=ttk.Frame(root)
 
 	text=Text(txtframe, wrap=WORD)
 	text.pack(side='left', fill='both', expand=True)
 	
-	echosback=Button(butframe, text='К списку эх')
+	echosback=ttk.Button(butframe, text='К списку эх')
 	echosback.bind("<Button-1>",displayEchoList)
 
-	scroll=Scrollbar(txtframe)
+	scroll=ttk.Scrollbar(txtframe)
 	scroll.pack(side='right', fill=Y)
 
 	text.config(yscrollcommand=scroll.set)
