@@ -52,6 +52,9 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QTextEdit" name="textEdit">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
          <property name="lineWrapMode">
           <enum>QTextEdit::WidgetWidth</enum>
          </property>

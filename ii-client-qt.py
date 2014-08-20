@@ -62,13 +62,14 @@ class Form(QtGui.QMainWindow):
 
 	def mainwindow(self):
 		uic.loadUi("mainwindow.ui",self)
+		self.pushButton.clicked.connect(self.getDialog)
 
 		for i in range(0,len(echoareas)):
 			cmd="self.but"""+str(i)+"=QtGui.QPushButton('"+echoareas[i]+"',self)"+"""
 def callb"""+str(i)+"(event):"+"""
 	slf.viewwindow('"""+echoareas[i]+"""')
 self.but"""+str(i)+".clicked.connect(callb"+str(i)+""")
-self.verticalLayout_2.addWidget(self.but"""+str(i)+")"
+self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			self.exc(cmd)
 
 	def viewwindow(self, echoarea):
