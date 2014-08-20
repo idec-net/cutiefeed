@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
-import locale,sys
+import locale,sys,cgi
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 from ii_functions import *
@@ -14,10 +14,16 @@ def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
 	msg=getMsg(msglist[msgnumber])
 	msgid_answer=msg.get('id')
-	msgtext="msgid: "+msgid_answer+"\n"+formatDate(msg.get('time'))+"\n"+msg.get('subj')+"\n"+msg.get('sender')+" -> "+msg.get('to')+"\n\n"+msg.get('msg')
+
+	subj=cgi.escape(msg.get('subj'), True)
+	sender=cgi.escape(msg.get('sender'), True)
+	to=cgi.escape(msg.get('to'), True)
+
+	msgtext="msgid: "+msgid_answer+"<br />"+formatDate(msg.get('time'))+"<br />"+subj+"<br /><b>"+sender+" -> "+to+"</b><br />"
 
 	slf.listWidget.setCurrentRow(msgnumber)
-	slf.textEdit.setText(msgtext)
+	slf.textEdit.setHtml(msgtext)
+	slf.textEdit.append(msg.get('msg'))
 
 def msgminus(event):
 	global msgnumber
@@ -42,9 +48,8 @@ def c_writeNew(event):
 
 def sendWrote(event):
 	countsent=sender.sendMessages()
-	box=QtGui.QMessageBox()
-	box.setText(u"Отправлено сообщений: "+str(countsent))
-	box.exec_()
+	form.mbox.setText(u"Отправлено сообщений: "+str(countsent))
+	form.mbox.exec_()
 
 def answer(event):
 	global echo,msgid_answer
@@ -56,13 +61,15 @@ class Form(QtGui.QMainWindow):
 		self.mainwindow()
 		global slf,msglist,msgnumber,listlen
 		slf=self
+		self.mbox=QtGui.QMessageBox()
+		self.mbox.setText(u"")
 
 	def exc(self,cmd):
 		exec compile(cmd, "<string>", "exec")
 
 	def mainwindow(self):
 		uic.loadUi("mainwindow.ui",self)
-		self.pushButton.clicked.connect(self.getDialog)
+		self.pushButton.clicked.connect(self.getNewText)
 
 		for i in range(0,len(echoareas)):
 			cmd="self.but"""+str(i)+"=QtGui.QPushButton('"+echoareas[i]+"',self)"+"""
@@ -97,25 +104,27 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_4.clicked.connect(sendWrote)
 		self.pushButton_5.clicked.connect(answer)
 		self.pushButton_6.clicked.connect(c_writeNew)
-		self.pushButton_7.clicked.connect(self.getDialog)
+		self.pushButton_7.clicked.connect(self.getNewText)
 
 	def getDialog(self):
 		uic.loadUi("getwindow.ui",self)
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(self.mainwindow)
-		self.getNewText()
 	
 	def getNewText(self):
 		msgids=webfetch.fetch_messages(adress, echoareas)
 		txt=""
 		if len(msgids)==0:
-			txt=u'Новых сообщений нет.'
+			self.mbox.setText(u'Новых сообщений нет.')
+			self.mbox.exec_()
 		else:
-			txt+=u'Новые сообщения:'
+			self.getDialog()
+			self.textEdit.insertPlainText(u'Новые сообщения:')
 			for msgid in msgids:
 				arr=getMsg(msgid)
-				txt+="\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n"+arr.get('sender')+" -> "+arr.get('to')+"\n\n"+arr.get('msg')
-		self.textEdit.setText(txt)
+				self.textEdit.append("\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n")
+				self.textEdit.append(arr.get('sender')+' -> '+arr.get('to'))
+				self.textEdit.append("\n"+arr.get('msg'))
 
 app = QtGui.QApplication(sys.argv)
 form=Form()
