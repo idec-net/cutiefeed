@@ -31,7 +31,7 @@ def updatemsg():
 
 def msgminus(event):
 	global msgnumber
-	if(msgnumber>=0):
+	if(msgnumber>0):
 		msgnumber-=1;
 		updatemsg()
 
