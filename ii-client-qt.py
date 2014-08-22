@@ -122,9 +122,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			self.textEdit.insertPlainText(u'Новые сообщения:')
 			for msgid in msgids:
 				arr=getMsg(msgid)
-				self.textEdit.append("\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n")
-				self.textEdit.append(arr.get('sender')+' -> '+arr.get('to'))
-				self.textEdit.append("\n"+arr.get('msg'))
+				self.textEdit.append("\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n"+arr.get('sender')+' -> '+arr.get('to')+"\n\n"+arr.get('msg'))
 
 app = QtGui.QApplication(sys.argv)
 form=Form()

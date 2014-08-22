@@ -24,16 +24,7 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>6</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -51,6 +42,9 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>2</number>
+       </property>
        <property name="margin">
         <number>0</number>
        </property>
@@ -60,6 +54,9 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>4</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -68,6 +65,9 @@
           </property>
           <property name="rightMargin">
            <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>5</number>
           </property>
           <item>
            <widget class="QPushButton" name="pushButton">
@@ -130,6 +130,9 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <property name="margin">
            <number>0</number>
           </property>

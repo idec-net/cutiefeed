@@ -28,13 +28,22 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>696</width>
-         <height>496</height>
+         <width>690</width>
+         <height>490</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>5</number>
+          </property>
           <item>
            <widget class="QPushButton" name="pushButton">
             <property name="text">
