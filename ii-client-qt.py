@@ -12,14 +12,22 @@ from PyQt4 import QtCore, QtGui, uic
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
-	msg=getMsg(msglist[msgnumber])
-	msgid_answer=msg.get('id')
-
+	msgid_answer=msglist[msgnumber]
+	msg=getMsg(msgid_answer)
+	
 	subj=cgi.escape(msg.get('subj'), True)
 	sender=cgi.escape(msg.get('sender'), True)
+	addr=cgi.escape(msg.get('addr'), True)
 	to=cgi.escape(msg.get('to'), True)
+	
+	repto1=msg.get('repto')
 
-	msgtext="msgid: "+msgid_answer+"<br />"+formatDate(msg.get('time'))+"<br />"+subj+"<br /><b>"+sender+" -> "+to+"</b><br />"
+	if(repto1):
+		repto=cgi.escape(repto1)
+	else:
+		repto=u"-"
+
+	msgtext="msgid: "+msgid_answer+"<br />"+u"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+subj+"<br /><b>"+sender+" ("+addr+")  ->  "+to+"</b><br />"
 
 	slf.listWidget.setCurrentRow(msgnumber)
 	slf.textEdit.setHtml(msgtext)
@@ -77,6 +85,7 @@ class Form(QtGui.QMainWindow):
 			cmd="self.but"""+str(i)+"=QtGui.QPushButton('"+echoareas[i]+"',self)"+"""
 def callb"""+str(i)+"(event):"+"""
 	slf.viewwindow('"""+echoareas[i]+"""')
+self.but"""+str(i)+".setFlat(True)"+"""
 self.but"""+str(i)+".clicked.connect(callb"+str(i)+""")
 self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			self.exc(cmd)
@@ -98,7 +107,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			self.listWidget.addItem(getMsg(msglist[i]).get('subj'))
 
 		self.listWidget.currentRowChanged.connect(lbselect)
-		updatemsg()
+		self.listWidget.setCurrentRow(msgnumber)
 
 		self.pushButton.clicked.connect(self.mainwindow)
 		self.pushButton_2.clicked.connect(msgminus)
