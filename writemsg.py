@@ -11,7 +11,7 @@ lasttoss=tosses[len(tosses)-1]+1
 
 def openEditor(file):
 	global editor
-	p=subprocess.Popen(editor+" "+file, shell=True)
+	p=subprocess.Popen(config["editor"]+" "+file, shell=True)
 
 def edit(message):
 	global lasttoss

@@ -12,12 +12,15 @@ def sendMessages():
 	for file in files:
 		f=open("out/"+file+".toss").read()
 		
-		adress=servers[0]["adress"]
+		selectedServer=servers[0]
 
 		for server in servers:
 			if(f[0] in server["echoareas"]):
-				adress=server["adress"]
+				selectedServer=server
 				break
+
+		adress=selectedServer["adress"]
+		authstr=selectedServer["authstr"]
 
 		code=base64.b64encode(f)
 		
