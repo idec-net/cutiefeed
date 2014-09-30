@@ -80,8 +80,9 @@ def mainwindow():
 	getbutton.pack(side='top')
 	getbutton.bind("<Button-1>",getNewMessages)
 
-	for i in range(0,len(echoareas)):
-		exc("global but"+str(i)+"""
+	def addButtons(echoareas):
+		for i in range(0,len(echoareas)):
+			exc("global but"+str(i)+"""
 but"""+str(i)+"=ttk.Button(buttonsframe,text='"+echoareas[i]+"')"+"""
 def callb"""+str(i)+"(event):"+"""
 	global root"""+"""
@@ -89,6 +90,16 @@ def callb"""+str(i)+"(event):"+"""
 	viewwindow('"""+echoareas[i]+"""')
 but"""+str(i)+".bind('<Button-1>',callb"+str(i)+""")
 but"""+str(i)+".pack()")
+
+	for server in servers:
+		echoareas=server["echoareas"]
+		Label(buttonsframe,text=server["adress"]).pack()
+		addButtons(server["echoareas"])
+	
+	if(len(config["offline-echoareas"])>0):
+		Label(buttonsframe,text="Эхи без сервера").pack()
+		addButtons(config["offline-echoareas"])
+
 	buttonsframe.pack(fill='both', expand=True)
 	scroll=ttk.Scrollbar(frame1, command=canvas.yview)
 	canvas.configure(yscrollcommand=scroll.set)
@@ -202,7 +213,11 @@ def getDialog():
 	echosback.pack(side='right')
 	txtframe.pack(fill='both',expand=True)
 
-	msgids=webfetch.fetch_messages(adress, echoareas)
+	msgids=[]
+	for server in servers:
+		msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xtenable"])
+		msgids+=msgidsNew
+
 	if len(msgids)==0:
 		text.insert(INSERT, 'Новых сообщений нет.')
 	else:

@@ -4,11 +4,7 @@ import os, base64, json, urllib, subprocess, datetime, hashlib
 
 configFile=open("config.json")
 config=json.load(configFile)
-adress=config["adress"]
-echoareas=config["echoareas"]
-authstr=config["authstr"]
-editor=config["editor"]
-xtenable=config["xtenable"]
+servers=config["servers"]
 
 def applyBlackList(str):
 	return str

@@ -16,7 +16,7 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch):
+def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
 	if(xtenable):
 		xtfile="base-"+hsh(adress)
 		donot=[]

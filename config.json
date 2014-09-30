@@ -1,12 +1,29 @@
 {
-	"adress": "http://irk38.tk/ii/ii-point.php?q=/",
-	"authstr": "",
-	"editor": "leafpad",
-	"echoareas": [
-		"im.100",
-		"pipe.2032",
-		"ii.14",
-		"lor-opennet.2014",
+	"servers": [
+		{
+			"adress": "http://ii-net.tk/ii/ii-point.php?q=/",
+			"authstr": "",
+			"echoareas": [
+				"im.100",
+				"pipe.2032",
+				"ii.14",
+				"lor-opennet.2014"
+			],
+			"xtenable":true
+		},
+		{
+			"adress": "http://spline.rooker.ru/ii/ii-point.php?q=/",
+			"authstr": "",
+			"echoareas": [
+				"spline.bash.rss.14.1",
+				"spline.creepy.14"
+			],
+			"xtenable":false
+		}
 	],
-	"xtenable":false
+	"offline-echoareas": [
+		"ii.soft.14",
+		"ii.dev.14"
+	],
+	"editor": "leafpad"
 }

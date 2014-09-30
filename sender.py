@@ -11,6 +11,14 @@ def sendMessages():
 	countsent=0
 	for file in files:
 		f=open("out/"+file+".toss").read()
+		
+		adress=servers[0]["adress"]
+
+		for server in servers:
+			if(f[0] in server["echoareas"]):
+				adress=server["adress"]
+				break
+
 		code=base64.b64encode(f)
 		
 		data = urllib.urlencode({'tmsg': code,'pauth': authstr})

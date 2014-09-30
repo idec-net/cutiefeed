@@ -81,14 +81,24 @@ class Form(QtGui.QMainWindow):
 		uic.loadUi("mainwindow.ui",self)
 		self.pushButton.clicked.connect(self.getNewText)
 
-		for i in range(0,len(echoareas)):
-			cmd="self.but"""+str(i)+"=QtGui.QPushButton('"+echoareas[i]+"',self)"+"""
+		def addButtons(echoareas):
+			for i in range(0,len(echoareas)):
+				cmd="self.but"""+str(i)+"=QtGui.QPushButton('"+echoareas[i]+"',self)"+"""
 def callb"""+str(i)+"(event):"+"""
 	slf.viewwindow('"""+echoareas[i]+"""')
 self.but"""+str(i)+".setFlat(True)"+"""
 self.but"""+str(i)+".clicked.connect(callb"+str(i)+""")
 self.verticalLayout.addWidget(self.but"""+str(i)+")"
-			self.exc(cmd)
+				self.exc(cmd)
+
+		for server in servers:
+			echoareas=server["echoareas"]
+			self.verticalLayout.addWidget(QtGui.QLabel(server["adress"], self))
+			addButtons(server["echoareas"])
+		
+		if(len(config["offline-echoareas"])>0):
+			self.verticalLayout.addWidget(QtGui.QLabel(u"Эхи без сервера", self))
+			addButtons(config["offline-echoareas"])
 
 	def viewwindow(self, echoarea):
 		global msglist,msgnumber,listlen,echo
@@ -123,7 +133,12 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_2.clicked.connect(self.mainwindow)
 	
 	def getNewText(self):
-		msgids=webfetch.fetch_messages(adress, echoareas)
+		msgids=[]
+		
+		for server in servers:
+			msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xtenable"])
+			msgids+=msgidsNew
+		
 		txt=""
 		if len(msgids)==0:
 			self.mbox.setText(u'Новых сообщений нет.')
