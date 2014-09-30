@@ -12,19 +12,20 @@ def sendMessages():
 	for file in files:
 		f=open("out/"+file+".toss").read()
 		
-		selectedServer=servers[0]
+		adress=servers[0]["adress"]
+		authstr=servers[0]["authstr"]
 
 		for server in servers:
-			if(f[0] in server["echoareas"]):
-				selectedServer=server
+			if(f.splitlines()[0] in server["echoareas"]):
+				adress=server["adress"]
+				authstr=server["authstr"]
 				break
-
-		adress=selectedServer["adress"]
-		authstr=selectedServer["authstr"]
-
+		
 		code=base64.b64encode(f)
 		
 		data = urllib.urlencode({'tmsg': code,'pauth': authstr})
+		print adress
+		print authstr
 		out = urllib.urlopen(adress + 'u/point', data).read()
 		print out
 		
