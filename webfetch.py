@@ -17,6 +17,8 @@ def parseFullEchoList(echobundle):
 	return echos2d
 
 def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
+	if(len(firstEchoesToFetch)==0):
+		return []
 	if(xtenable):
 		xtfile="base-"+hsh(adress)
 		donot=[]
@@ -29,27 +31,29 @@ def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
 		if(f):
 			remotextget=getfile(adress+"x/t/"+"/".join(firstEchoesToFetch))
 			remotext=[x.split(":") for x in remotextget.splitlines()]
+				
+			if(len(f)==len(remotext)):
+				xtdict={}
+				for x in remotext:
+					xtdict[x[0]]=int(x[1])
+				localdict={}
+				for x in [i.split(":") for i in f]:
+					localdict[x[0]]=int(x[1])
 			
-			xtdict={}
-			for x in remotext:
-				xtdict[x[0]]=int(x[1])
-			localdict={}
-			for x in [i.split(":") for i in f]:
-				localdict[x[0]]=int(x[1])
-	
-			for echo in firstEchoesToFetch:
-				if int(xtdict[echo])==int(localdict[echo]):
-					donot.append(echo)
-					print "removed "+echo
-			
+				for echo in firstEchoesToFetch:
+					if int(xtdict[echo])==int(localdict[echo]):
+						donot.append(echo)
+						print "removed "+echo
+				
 			open(xtfile, "w").write(remotextget)
 	
 		echoesToFetch=[x for x in firstEchoesToFetch if x not in donot]
-		if(len(echoesToFetch)==0):
-			return []
 	else:
 		echoesToFetch=firstEchoesToFetch
 
+	if(len(echoesToFetch)==0):
+		return []
+	
 	echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch))
 	remoteEchos2d=parseFullEchoList(applyBlackList(echoBundle))
 	savedMessages=[]
