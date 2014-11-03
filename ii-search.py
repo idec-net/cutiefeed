@@ -56,6 +56,7 @@ for x in index:
 
 print "Фильтрация сообщений...\n"
 for msg in msglist.itervalues():
+	c=False
 	for point in senders:
 		if(str(point) in msg["sender"]):
 			c=True
