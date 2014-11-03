@@ -30,8 +30,8 @@ subj=raw_input("Введите тему сообщения: ").decode("utf8")
 text=raw_input("Введите строку для поиска: ").decode("utf8")
 
 dformat="%Y%m%d"
-dateone=datetime.date(1970,1,1)
-datetwo=datetime.date.today()
+dateone=datetime.datetime(1970,1,1)
+datetwo=datetime.datetime.today()
 if(len(timeprom)==2):
 	dateone=datetime.datetime.strptime(timeprom[0], dformat)
 	datetwo=datetime.datetime.strptime(timeprom[1], dformat)
