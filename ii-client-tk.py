@@ -6,6 +6,7 @@ import locale
 import ttk
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
+from getcfg import *
 from ii_functions import *
 import webfetch
 import writemsg

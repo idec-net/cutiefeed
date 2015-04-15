@@ -1,7 +1,8 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 # -*- coding:utf8 -*-
 
 from ii_functions import *
+from getcfg import *
 
 def sendMessages():
 	files=os.listdir("out")

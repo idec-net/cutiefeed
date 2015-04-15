@@ -46,7 +46,7 @@ def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
 						print "removed "+echo
 				
 			open(xtfile, "w").write(remotextget)
-	
+			
 		echoesToFetch=[x for x in firstEchoesToFetch if x not in donot]
 	else:
 		echoesToFetch=firstEchoesToFetch

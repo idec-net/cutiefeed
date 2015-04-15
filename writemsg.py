@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 # -*- config:utf8 -*-
 from ii_functions import *
+from getcfg import *
 
 tosses=[int(i.strip(".toss").strip(".out")) for i in os.listdir("out")]
 tosses.sort()
@@ -10,7 +11,6 @@ if(len(tosses)==0):
 lasttoss=tosses[len(tosses)-1]+1
 
 def openEditor(file):
-	global editor
 	p=subprocess.Popen(config["editor"]+" "+file, shell=True)
 
 def edit(message):

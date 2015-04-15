@@ -1,10 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
-import os, base64, json, urllib, subprocess, datetime, hashlib
-
-configFile=open("config.json")
-config=json.load(configFile)
-servers=config["servers"]
+import os, base64, urllib, subprocess, datetime, hashlib
 
 def applyBlackList(str):
 	return str
@@ -31,8 +27,9 @@ def b64d(str):
 def hsh(str):
 	return base64.urlsafe_b64encode( hashlib.sha256(str).digest() ).replace('-','A').replace('_','z')[:20]
 
-def getfile(file):
-	print "fetch "+file
+def getfile(file, quiet=False):
+	if (not quiet):
+		print "fetch "+file
 	return urllib.urlopen(file).read()
 
 def touch(fname):

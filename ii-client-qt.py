@@ -3,6 +3,7 @@
 import locale,sys,cgi
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
+from getcfg import *
 from ii_functions import *
 import webfetch
 import writemsg
@@ -55,9 +56,13 @@ def c_writeNew(event):
 	writemsg.writeNew(echo)
 
 def sendWrote(event):
-	countsent=sender.sendMessages()
-	form.mbox.setText(u"Отправлено сообщений: "+str(countsent))
-	form.mbox.exec_()
+	try:
+		countsent=sender.sendMessages()
+		form.mbox.setText(u"Отправлено сообщений: "+str(countsent))
+		form.mbox.exec_()
+	except Exception,e:
+		form.mbox.setText(u"Ошибка отправки: "+str(e).decode("utf8"))
+		form.mbox.exec_()
 
 def answer(event):
 	global echo,msgid_answer
@@ -80,6 +85,7 @@ class Form(QtGui.QMainWindow):
 	def mainwindow(self):
 		uic.loadUi("mainwindow.ui",self)
 		self.pushButton.clicked.connect(self.getNewText)
+		self.pushButton_2.clicked.connect(sendWrote)
 
 		def addButtons(echoareas):
 			for i in range(0,len(echoareas)):
@@ -136,10 +142,13 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		msgids=[]
 		
 		for server in servers:
-			msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xtenable"])
-			msgids+=msgidsNew
+			try:
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xtenable"])
+				msgids+=msgidsNew
+			except Exception, e:
+				self.mbox.setText(server["adress"]+u': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e).decode("utf8"))
+				self.mbox.exec_()
 		
-		txt=""
 		if len(msgids)==0:
 			self.mbox.setText(u'Новых сообщений нет.')
 			self.mbox.exec_()
