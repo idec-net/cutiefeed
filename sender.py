@@ -3,15 +3,16 @@
 
 from ii_functions import *
 from getcfg import *
+import paths
 
 def sendMessages():
-	files=os.listdir("out")
+	files=os.listdir(paths.tossesdir)
 	files=[x[:-5] for x in files if x.endswith(".toss")]
 	files.sort()
 	
 	countsent=0
 	for file in files:
-		f=open("out/"+file+".toss").read()
+		f=open(paths.tossesdir+file+".toss").read()
 		
 		adress=servers[0]["adress"]
 		authstr=servers[0]["authstr"]
@@ -32,5 +33,5 @@ def sendMessages():
 		
 		if out.startswith('msg ok'):
 			countsent+=1
-			os.rename("out/"+file+".toss", "out/"+file+".out")
+			os.rename(paths.tossesdir+file+".toss", paths.tossesdir+file+".out")
 	return countsent

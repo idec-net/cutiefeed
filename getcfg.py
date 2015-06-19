@@ -1,14 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
-import ConfigParser,os
+import ConfigParser,os,paths
 
 iniparser=ConfigParser.ConfigParser()
-if (not os.path.exists("config.ini") and os.path.exists("config.default.ini")):
+if (not os.path.exists(paths.configfile) and os.path.exists(paths.configfile_default)):
 	import shutil
 	print "Warning: could not find config. Trying to copy default one to it."
-	shutil.copyfile("config.default.ini", "config.ini")
+	shutil.copyfile(paths.configfile_default, paths.configfile)
 
-if (not iniparser.read("config.ini")):
+if (not iniparser.read(paths.configfile)):
 	print "Error: can't load config. Exiting."
 	exit()
 
@@ -37,3 +37,8 @@ for section in sections:
 
 servers=config["servers"]
 print "Config loaded"
+
+for directory in [paths.datadir, paths.indexdir, paths.msgdir, paths.tossesdir]:
+	if not os.path.exists(directory):
+		print "Directory "+directory+" does not exist. Creating..."
+		os.makedirs(directory)

@@ -1,13 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
 import os, base64, urllib, subprocess, datetime, hashlib
+import paths
 
 def applyBlackList(str):
 	return str
 
 def getMsg(msgid):
 	try:
-		msg=open("msg/"+msgid).read().decode('utf-8').splitlines()
+		msg=open(paths.msgdir+msgid).read().decode('utf-8').splitlines()
 		tags=parseTags(msg[0])
 		if('repto' in tags):
 			rpt=tags['repto']
@@ -39,20 +40,14 @@ def touch(fname):
 		open(fname, 'a').close()
 
 def savemsg(hash, echo, message):
-	touch("msg/"+hash)
-	touch("echo/"+echo)
-	open("msg/"+hash, "w").write(message)
-	open("echo/"+echo, "a").write(hash+"\n")
-
-def getLocalEcho(echo):
-	if(not os.path.exists("echo/"+echo)):
-		return ""
-	else:
-		return open("echo/"+echo).read()
+	touch(paths.msgdir+hash)
+	touch(paths.indexdir+echo)
+	open(paths.msgdir+hash, "w").write(message)
+	open(paths.indexdir+echo, "a").write(hash+"\n")
 
 def getMsgList(echo):
-	if(os.path.exists("echo/"+echo)):
-		return open("echo/"+echo).read().decode('utf-8').splitlines()
+	if(os.path.exists(paths.indexdir+echo)):
+		return open(paths.indexdir+echo).read().decode('utf-8').splitlines()
 	else:
 		return []
 

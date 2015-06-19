@@ -1,18 +1,19 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
 from ii_functions import *
+import paths
 
 def parseFullEchoList(echobundle):
 	echos2d={}
 	echobundle=echobundle.splitlines()
 	lastecho=""
 
-	for i in range(0,len(echobundle)):
-		if(echobundle[i]):
-			if("." not in echobundle[i]):
-				echos2d[lastecho].append(echobundle[i])
+	for element in echobundle:
+		if element:
+			if "." not in element:
+				echos2d[lastecho].append(element)
 			else:
-				lastecho=echobundle[i]
+				lastecho=element
 				echos2d[lastecho]=[]
 	return echos2d
 
@@ -20,7 +21,7 @@ def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
 	if(len(firstEchoesToFetch)==0):
 		return []
 	if(xtenable):
-		xtfile="base-"+hsh(adress)
+		xtfile=paths.datadir+"base-"+hsh(adress)
 		donot=[]
 		try:
 			f=open(xtfile).read().splitlines()
@@ -59,7 +60,7 @@ def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
 	savedMessages=[]
 	
 	for echo in echoesToFetch:
-		localMessages=getLocalEcho(echo)
+		localMessages=getMsgList(echo)
 		
 		remoteMessages=remoteEchos2d[echo]
 

@@ -2,8 +2,9 @@
 # -*- config:utf8 -*-
 from ii_functions import *
 from getcfg import *
+import paths
 
-tosses=[int(i.strip(".toss").strip(".out")) for i in os.listdir("out")]
+tosses=[int(i.strip(".toss").strip(".out")) for i in os.listdir(paths.tossesdir)]
 tosses.sort()
 
 if(len(tosses)==0):
@@ -15,7 +16,7 @@ def openEditor(file):
 
 def edit(message):
 	global lasttoss
-	fname="out/"+str(lasttoss)+".toss"
+	fname=paths.tossesdir+str(lasttoss)+".toss"
 	touch(fname)
 	open(fname, "w").write(message.encode("utf8"))
 	openEditor(fname)
