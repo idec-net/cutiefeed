@@ -71,7 +71,7 @@ def answer(event):
 class Form(QtGui.QMainWindow):
 	def __init__(self):
 		super(Form, self).__init__()
-		self.setWindowIcon(QtGui.QIcon('iilogo.png'))
+		self.setWindowIcon(QtGui.QIcon('artwork/iilogo.png'))
 		
 		self.mainwindow()
 		global slf,msglist,msgnumber,listlen

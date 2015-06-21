@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /usr/share/iicli-modular/
+./ii-client-tk.py
