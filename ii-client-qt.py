@@ -9,7 +9,7 @@ import webfetch
 import writemsg
 import sender
 
-from PyQt4 import QtCore, QtGui, uic
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
@@ -68,7 +68,7 @@ def answer(event):
 	global echo,msgid_answer
 	writemsg.answer(echo, msgid_answer)
 
-class Form(QtGui.QMainWindow):
+class Form(QtWidgets.QMainWindow):
 	def __init__(self):
 		super(Form, self).__init__()
 		self.setWindowIcon(QtGui.QIcon('artwork/iilogo.png'))
@@ -76,7 +76,7 @@ class Form(QtGui.QMainWindow):
 		self.mainwindow()
 		global slf,msglist,msgnumber,listlen
 		slf=self
-		self.mbox=QtGui.QMessageBox()
+		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText(u"")
 
 	def exc(self,cmd):
@@ -89,7 +89,7 @@ class Form(QtGui.QMainWindow):
 
 		def addButtons(echoareas):
 			for i in range(0,len(echoareas)):
-				cmd="self.but"""+str(i)+"=QtGui.QPushButton('"+echoareas[i]+"',self)"+"""
+				cmd="self.but"""+str(i)+"=QtWidgets.QPushButton('"+echoareas[i]+"',self)"+"""
 def callb"""+str(i)+"(event):"+"""
 	slf.viewwindow('"""+echoareas[i]+"""')
 self.but"""+str(i)+".setFlat(True)"+"""
@@ -99,11 +99,11 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 
 		for server in servers:
 			echoareas=server["echoareas"]
-			self.verticalLayout.addWidget(QtGui.QLabel(server["adress"], self))
+			self.verticalLayout.addWidget(QtWidgets.QLabel(server["adress"], self))
 			addButtons(server["echoareas"])
 		
 		if(len(config["offline-echoareas"])>0):
-			self.verticalLayout.addWidget(QtGui.QLabel(u"Эхи без сервера", self))
+			self.verticalLayout.addWidget(QtWidgets.QLabel(u"Эхи без сервера", self))
 			addButtons(config["offline-echoareas"])
 
 	def viewwindow(self, echoarea):
@@ -159,7 +159,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 				arr=getMsg(msgid)
 				self.textEdit.append("\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n"+arr.get('sender')+' -> '+arr.get('to')+"\n\n"+arr.get('msg'))
 
-app = QtGui.QApplication(sys.argv)
+app = QtWidgets.QApplication(sys.argv)
 form=Form()
 form.show()
 app.exec_()
