@@ -68,11 +68,20 @@ def answer(event):
 	global echo,msgid_answer
 	writemsg.answer(echo, msgid_answer)
 
+def setUIResize(filename, object):
+	# данный метод чинит изменение размера окна
+	# в тайловых оконных менеджерах
+	# в qt4 это не нужно было, а в 5 нужно
+	currentsize=object.size()
+	uic.loadUi(filename,object)
+	object.resize(currentsize) # восстанавливаем предыдущий размер
+
 class Form(QtWidgets.QMainWindow):
 	def __init__(self):
 		super(Form, self).__init__()
 		self.setWindowIcon(QtGui.QIcon('artwork/iilogo.png'))
-		
+
+		self.resize(400,500)
 		self.mainwindow()
 		global slf,msglist,msgnumber,listlen
 		slf=self
@@ -83,7 +92,8 @@ class Form(QtWidgets.QMainWindow):
 		exec compile(cmd, "<string>", "exec")
 
 	def mainwindow(self):
-		uic.loadUi("mainwindow.ui",self)
+		setUIResize("mainwindow.ui",self)
+
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
 
@@ -109,8 +119,9 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 	def viewwindow(self, echoarea):
 		global msglist,msgnumber,listlen,echo
 		echo=echoarea
-	
-		uic.loadUi("viewwindow.ui",self)
+
+		setUIResize("viewwindow.ui",self)
+
 		self.setWindowTitle(u"Просмотр сообщений: "+echoarea)
 	
 		msglist=getMsgList(echoarea)
@@ -134,7 +145,8 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_7.clicked.connect(self.getNewText)
 
 	def getDialog(self):
-		uic.loadUi("getwindow.ui",self)
+		setUIResize("getwindow.ui",self)
+
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(self.mainwindow)
 	
@@ -162,4 +174,4 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 app = QtWidgets.QApplication(sys.argv)
 form=Form()
 form.show()
-app.exec_()
+sys.exit(app.exec_())
