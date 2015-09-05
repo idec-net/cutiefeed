@@ -79,7 +79,9 @@ def setUIResize(filename, object):
 class Form(QtWidgets.QMainWindow):
 	def __init__(self):
 		super(Form, self).__init__()
-		self.setWindowIcon(QtGui.QIcon('artwork/iilogo.png'))
+
+		windowIcon=QtGui.QIcon('artwork/iilogo.png')
+		self.setWindowIcon(windowIcon)
 
 		self.resize(400,500)
 		self.mainwindow()
@@ -87,6 +89,13 @@ class Form(QtWidgets.QMainWindow):
 		slf=self
 		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText(u"")
+
+		# настраиваем диалог удаления тоссов
+
+		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, u"Подтверждение", u"Удалить исходящие сообщения", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+		self.clearMessages.setText(u"Удалить исходящие сообщения?")
+		self.deleteAll=QtWidgets.QCheckBox(u"В том числе отправленные")
+		self.clearMessages.setCheckBox(self.deleteAll)
 
 	def exc(self,cmd):
 		exec compile(cmd, "<string>", "exec")
@@ -96,6 +105,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
+		self.deleteTossesButton.clicked.connect(self.deleteTosses)
 
 		def addButtons(echoareas):
 			for i in range(0,len(echoareas)):
@@ -144,6 +154,8 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_6.clicked.connect(c_writeNew)
 		self.pushButton_7.clicked.connect(self.getNewText)
 
+		self.deleteTossesButton.clicked.connect(self.deleteTosses)
+
 	def getDialog(self):
 		setUIResize("getwindow.ui",self)
 
@@ -170,6 +182,29 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			for msgid in msgids:
 				arr=getMsg(msgid)
 				self.textEdit.append("\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n"+arr.get('sender')+' -> '+arr.get('to')+"\n\n"+arr.get('msg'))
+	
+	def deleteTosses(self):
+		answer=self.clearMessages.exec_()
+		counter=0
+
+		if answer == QtWidgets.QMessageBox.Yes:
+			if self.deleteAll.isChecked():
+				for filename in os.listdir(paths.tossesdir):
+					print "rm "+filename
+					counter+=1
+					os.remove(os.path.join(paths.tossesdir, filename))
+			else:
+				for filename in os.listdir(paths.tossesdir):
+					if filename[-5:]==".toss":
+						print "rm "+filename
+						counter+=1
+						os.remove(os.path.join(paths.tossesdir, filename))
+			
+			if counter>0:
+				self.mbox.setText(u"Удалено сообщений: "+str(counter))
+			else:
+				self.mbox.setText(u"Удалять нечего")
+			self.mbox.exec_()
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()
