@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
-import locale,sys,cgi
+import locale,sys
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 from getcfg import *
@@ -8,31 +8,30 @@ from ii_functions import *
 import webfetch
 import writemsg
 import sender
+import re
+import webbrowser
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+
+urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
+quotetemplate=re.compile("^>+.+$", re.MULTILINE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
 	msgid_answer=msglist[msgnumber]
-	msg=getMsg(msgid_answer)
-	
-	subj=cgi.escape(msg.get('subj'), True)
-	sender=cgi.escape(msg.get('sender'), True)
-	addr=cgi.escape(msg.get('addr'), True)
-	to=cgi.escape(msg.get('to'), True)
+	msg=getMsgEscape(msgid_answer)
 	
 	repto1=msg.get('repto')
 
 	if(repto1):
-		repto=cgi.escape(repto1)
+		repto=repto1
 	else:
 		repto=u"-"
 
-	msgtext="msgid: "+msgid_answer+"<br />"+u"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+subj+"<br /><b>"+sender+" ("+addr+")  ->  "+to+"</b><br />"
+	msgtext="msgid: "+msgid_answer+"<br />"+u"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
 	slf.listWidget.setCurrentRow(msgnumber)
-	slf.textEdit.setHtml(msgtext)
-	slf.textEdit.append(msg.get('msg'))
+	slf.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
 
 def msgminus(event):
 	global msgnumber
@@ -75,6 +74,16 @@ def setUIResize(filename, object):
 	currentsize=object.size()
 	uic.loadUi(filename,object)
 	object.resize(currentsize) # восстанавливаем предыдущий размер
+
+def reparseMessage(string):
+	global urltemplate, quotetemplate
+	string=urltemplate.sub(u"<a href='\g<0>'>\g<0></a>", string)
+	string=quotetemplate.sub(u"<font color='green'>\g<0></font>", string)
+	return string.replace("\n", "<br />")
+
+def openLink(link):
+	print "opening link in default browser"
+	webbrowser.open(link.toString())
 
 class Form(QtWidgets.QMainWindow):
 	def __init__(self):
@@ -141,7 +150,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		listlen=len(msglist)-2
 
 		for i in range(listlen+2):
-			self.listWidget.addItem(getMsg(msglist[i]).get('subj'))
+			self.listWidget.addItem(getMsgEscape(msglist[i]).get('subj'))
 
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
@@ -155,12 +164,14 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_7.clicked.connect(self.getNewText)
 
 		self.deleteTossesButton.clicked.connect(self.deleteTosses)
+		self.textBrowser.anchorClicked.connect(openLink)
 
 	def getDialog(self):
 		setUIResize("getwindow.ui",self)
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(self.mainwindow)
+		self.textBrowser.anchorClicked.connect(openLink)
 	
 	def getNewText(self):
 		msgids=[]
@@ -178,10 +189,11 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			self.mbox.exec_()
 		else:
 			self.getDialog()
-			self.textEdit.insertPlainText(u'Новые сообщения:')
+			htmlcode=u"Новые сообщения:"
 			for msgid in msgids:
-				arr=getMsg(msgid)
-				self.textEdit.append("\n\n"+arr.get('echo')+"\nmsgid: "+arr.get('id')+"\n"+formatDate(arr.get('time'))+"\n"+arr.get('subj')+"\n"+arr.get('sender')+' -> '+arr.get('to')+"\n\n"+arr.get('msg'))
+				arr=getMsgEscape(msgid)
+				htmlcode+="<br /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
+			self.textBrowser.insertHtml(htmlcode)
 	
 	def deleteTosses(self):
 		answer=self.clearMessages.exec_()

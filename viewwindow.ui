@@ -189,7 +189,11 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QTextEdit" name="textEdit"/>
+           <widget class="QTextBrowser" name="textBrowser">
+            <property name="openLinks">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

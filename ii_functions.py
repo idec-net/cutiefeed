@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding:utf8 -*-
-import os, base64, urllib, subprocess, datetime, hashlib
+import os, base64, urllib, subprocess, datetime, hashlib, cgi
 import paths
 
 def applyBlackList(str):
@@ -21,6 +21,17 @@ def getMsg(msgid):
 	except:
 		meta=dict(repto=False,echo="",time=0,sender="",addr="",to="",subj="",msg="no message",id=msgid)
 	return meta
+
+def getMsgEscape(msgid): # получаем сообщение и режем html в нужных частях
+	m=getMsg(msgid)
+	values=["sender", "subj", "addr", "to", "msg", "repto"]
+	for value in values:
+		if (type(m[value]) == bool): # если repto == False (для совместимости), ибо нельзя обрабатывать не строку
+			continue
+
+		m[value]=cgi.escape(m[value], True)
+	
+	return m
 
 def b64d(str):
 	return base64.b64decode(str)
