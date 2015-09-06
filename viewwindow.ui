@@ -156,9 +156,6 @@
             <property name="text">
              <string>X</string>
             </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
            </widget>
           </item>
          </layout>
