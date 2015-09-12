@@ -1,0 +1,29 @@
+{
+	"servers": [
+		{
+			"adress": "http://ii-net.tk/ii/ii-point.php?q=/",
+			"authstr": "",
+			"echoareas": [
+				"pipe.2032",
+				"ii.14",
+				"lor-opennet.15",
+				"mlp.15"
+			],
+			"xtenable":true
+		},
+		{
+			"adress": "http://spline.rooker.ru/ii/ii-point.php?q=/",
+			"authstr": "",
+			"echoareas": [
+				"spline.creepy.14",
+				"spline.local.14"
+			],
+			"xtenable":false
+		}
+	],
+	"offline-echoareas": [
+		"ii.soft.14",
+		"ii.dev.14"
+	],
+	"editor": "leafpad"
+}

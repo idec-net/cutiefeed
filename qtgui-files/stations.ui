@@ -96,7 +96,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QListView" name="listView"/>
+           <widget class="QListWidget" name="listWidget"/>
           </item>
           <item>
            <widget class="QFrame" name="frame_3">
