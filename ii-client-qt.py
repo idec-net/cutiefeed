@@ -110,7 +110,7 @@ class Form(QtWidgets.QMainWindow):
 		exec compile(cmd, "<string>", "exec")
 
 	def mainwindow(self):
-		setUIResize("mainwindow.ui",self)
+		setUIResize("qtgui-files/mainwindow.ui",self)
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
@@ -139,7 +139,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		global msglist,msgnumber,listlen,echo
 		echo=echoarea
 
-		setUIResize("viewwindow.ui",self)
+		setUIResize("qtgui-files/viewwindow.ui",self)
 
 		self.setWindowTitle(u"Просмотр сообщений: "+echoarea)
 	
@@ -167,7 +167,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.textBrowser.anchorClicked.connect(openLink)
 
 	def getDialog(self):
-		setUIResize("getwindow.ui",self)
+		setUIResize("qtgui-files/getwindow.ui",self)
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(self.mainwindow)
@@ -192,7 +192,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			htmlcode=u"Новые сообщения:"
 			for msgid in msgids:
 				arr=getMsgEscape(msgid)
-				htmlcode+="<br /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
+				htmlcode+="<br /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
 			self.textBrowser.insertHtml(htmlcode)
 	
 	def deleteTosses(self):
