@@ -75,6 +75,37 @@ def setUIResize(filename, object):
 	uic.loadUi(filename,object)
 	object.resize(currentsize) # восстанавливаем предыдущий размер
 
+def editItem(event):
+	lw=event.listWidget()
+	event.setFlags(QtCore.Qt.ItemFlags(1|2|32)) # ставим, что элемент активный, что его можно править, и что он выбираемый
+	lw.editItem(event)
+
+def deleteItem(event):
+	form.currLw.takeItem(form.currLw.currentRow())
+
+def addItem(event):
+	newListItem=QtWidgets.QListWidgetItem("echoarea.15")
+	newListItem.setFlags(QtCore.Qt.ItemFlags(1|2|32))
+	targetRow=form.currLw.currentRow()+1
+	form.currLw.insertItem(targetRow, newListItem)
+	form.currLw.setCurrentRow(targetRow)
+	form.currLw.editItem(newListItem)
+
+def itemUp(event):
+	targetRow=form.currLw.currentRow()-1
+	if (targetRow>=0):
+		tookItem=form.currLw.takeItem(targetRow+1)
+		form.currLw.insertItem(targetRow, tookItem)
+		form.currLw.setCurrentRow(targetRow)
+
+def itemDown(event):
+	targetRow=form.currLw.currentRow()+1
+	count=form.currLw.count()
+	if (targetRow<count):
+		tookItem=form.currLw.takeItem(targetRow-1)
+		form.currLw.insertItem(targetRow, tookItem)
+		form.currLw.setCurrentRow(targetRow)
+
 def reparseMessage(string):
 	global urltemplate, quotetemplate
 	string=urltemplate.sub(u"<a href='\g<0>'>\g<0></a>", string)
@@ -106,6 +137,10 @@ class Form(QtWidgets.QMainWindow):
 		self.deleteAll=QtWidgets.QCheckBox(u"В том числе отправленные")
 		self.clearMessages.setCheckBox(self.deleteAll)
 
+		self.setupClientConfig()
+		self.setupServersConfig()
+		self.setupMenu()
+
 	def exc(self,cmd):
 		exec compile(cmd, "<string>", "exec")
 
@@ -114,7 +149,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
-		self.deleteTossesButton.clicked.connect(self.deleteTosses)
+		self.menuButton.clicked.connect(self.callMenu)
 
 		def addButtons(echoareas):
 			for i in range(0,len(echoareas)):
@@ -163,7 +198,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_6.clicked.connect(c_writeNew)
 		self.pushButton_7.clicked.connect(self.getNewText)
 
-		self.deleteTossesButton.clicked.connect(self.deleteTosses)
+		self.menuButton.clicked.connect(self.callMenu)
 		self.textBrowser.anchorClicked.connect(openLink)
 
 	def getDialog(self):
@@ -217,6 +252,118 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			else:
 				self.mbox.setText(u"Удалять нечего")
 			self.mbox.exec_()
+	
+	def setupMenu(self):
+		self.clMenu=QtWidgets.QMenu()
+
+		clientSettingsAction=QtWidgets.QAction("Настройки клиента", self)
+		serversSettingsAction=QtWidgets.QAction("Настройки станций", self)
+		saveSettingsAction=QtWidgets.QAction("Сохранить настройки", self)
+		deleteTossesAction=QtWidgets.QAction("Удалить исходящие", self)
+		
+		clientSettingsAction.triggered.connect(self.execClientConfig)
+		serversSettingsAction.triggered.connect(self.execServersConfig)
+		saveSettingsAction.triggered.connect(self.saveChanges)
+		deleteTossesAction.triggered.connect(self.deleteTosses)
+
+		self.clMenu.addAction(clientSettingsAction)
+		self.clMenu.addAction(serversSettingsAction)
+		self.clMenu.addAction(saveSettingsAction)
+		
+		self.clMenu.addSeparator()
+		self.clMenu.addAction(deleteTossesAction)
+
+	def callMenu(self):
+		mpos = QtGui.QCursor
+		x = mpos.pos().x()
+		y = mpos.pos().y()
+		self.clMenu.setGeometry( x-20, y-20, 0, 0)
+		self.clMenu.exec_()
+
+	def setupClientConfig(self):
+		self.clientConfig=uic.loadUi("qtgui-files/clientconfig.ui")
+		self.clientConfig.listWidget.itemDoubleClicked.connect(editItem)
+		self.clientConfig.pushButton.clicked.connect(addItem) # кнопка Добавить
+		self.clientConfig.pushButton_2.clicked.connect(deleteItem) # кнопка Удалить
+		self.clientConfig.pushButton_3.clicked.connect(itemUp) # кнопка Вверх
+		self.clientConfig.pushButton_4.clicked.connect(itemDown) # кнопка Вниз
+
+		self.clientConfig.accepted.connect(self.applyClientConfig)
+
+	def setupServersConfig(self):
+		self.serversConfig=uic.loadUi("qtgui-files/stations.ui")
+		self.serversConfig.listWidget.itemDoubleClicked.connect(editItem)
+		self.serversConfig.pushButton.clicked.connect(addItem) # кнопка Добавить
+		self.serversConfig.pushButton_2.clicked.connect(deleteItem) # кнопка Удалить
+		self.serversConfig.pushButton_3.clicked.connect(itemUp) # кнопка Вверх
+		self.serversConfig.pushButton_4.clicked.connect(itemDown) # кнопка Вниз
+
+		self.serversConfig.accepted.connect(self.applyServersConfig)
+	
+	def loadInfo_client(self):
+		self.clientConfig.lineEdit.setText(config["editor"])
+		self.clientConfig.listWidget.clear()
+		self.clientConfig.listWidget.addItems(config["offline-echoareas"])
+
+		if (len(config["offline-echoareas"])>0):
+			self.clientConfig.listWidget.setCurrentRow(0)
+
+	def loadInfo_servers(self):
+		curr=servers[0]
+		self.serversConfig.lineEdit.setText(curr["adress"])
+		self.serversConfig.lineEdit_2.setText(curr["authstr"])
+		self.serversConfig.listWidget.clear()
+		self.serversConfig.listWidget.addItems(curr["echoareas"])
+
+		if (len(curr["echoareas"])>0):
+			self.serversConfig.listWidget.setCurrentRow(0)
+
+		checkState=0
+
+		if curr["xtenable"]==True:
+			checkState=2 # ставим, что чекбокс нажат
+
+		self.serversConfig.checkBox.setCheckState(checkState)
+
+	def execClientConfig(self):
+		self.loadInfo_client()
+		self.currLw=self.clientConfig.listWidget
+		self.clientConfig.exec_()
+	
+	def execServersConfig(self):
+		self.loadInfo_servers()
+		self.currLw=self.serversConfig.listWidget
+		self.serversConfig.exec_()
+	
+	def applyClientConfig(self):
+		config["editor"]=self.clientConfig.lineEdit.text()
+		count=self.clientConfig.listWidget.count()
+
+		config["offline-echoareas"]=[]
+
+		for index in range(0,count):
+			config["offline-echoareas"].append(self.clientConfig.listWidget.item(index).text())
+	
+	def applyServersConfig(self):
+		servers[0]["adress"]=self.serversConfig.lineEdit.text()
+		servers[0]["authstr"]=self.serversConfig.lineEdit_2.text()
+		servers[0]["xtenable"]=self.serversConfig.checkBox.isChecked()
+
+		servers[0]["echoareas"]=[]
+		count=self.serversConfig.listWidget.count()
+		
+		for index in range(0,count):
+			servers[0]["echoareas"].append(self.serversConfig.listWidget.item(index).text())
+
+		config["servers"]=servers
+
+	def saveChanges(self):
+		result=saveConfig()
+		if result:
+			self.mbox.setText("Настройки сохранены")
+		else:
+			self.mbox.setText("Упс, сохранить не получилось, смотри в логи.")
+		return self.mbox.exec_()
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()

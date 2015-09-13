@@ -71,7 +71,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="deleteTossesButton">
+           <widget class="QPushButton" name="menuButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -85,10 +85,16 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Удалить исходящие</string>
+             <string>Меню</string>
             </property>
-            <property name="text">
-             <string>X</string>
+            <property name="icon">
+             <iconset theme="document-properties"/>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>36</width>
+              <height>36</height>
+             </size>
             </property>
             <property name="flat">
              <bool>true</bool>
