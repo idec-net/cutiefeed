@@ -10,6 +10,8 @@ if (not os.path.exists(paths.configfile) and os.path.exists(paths.configfile_def
 try:
 	configFile=open(paths.configfile)
 	config=json.load(configFile)
+	configFile.close()
+
 except Exception, e:
 	print "Caught exception: "+str(e)
 	print "Error: can't load config. Exiting."
@@ -17,6 +19,16 @@ except Exception, e:
 
 servers=config["servers"]
 print "Config loaded"
+
+def saveConfig():
+	try:
+		configFile=open(paths.configfile, "w")
+		json.dump(config, configFile)
+		configFile.close()
+	except Exception, e:
+		print "Caught exception while saving: "+str(e)
+		return False
+	return True
 
 for directory in [paths.datadir, paths.indexdir, paths.msgdir, paths.tossesdir]:
 	if not os.path.exists(directory):
