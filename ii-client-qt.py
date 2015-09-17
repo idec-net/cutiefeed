@@ -132,14 +132,16 @@ class Form(QtWidgets.QMainWindow):
 
 		# настраиваем диалог удаления тоссов
 
-		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, u"Подтверждение", u"Удалить исходящие сообщения", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-		self.clearMessages.setText(u"Удалить исходящие сообщения?")
+		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, u"Подтверждение", u"Удалить исходящие сообщения?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 		self.deleteAll=QtWidgets.QCheckBox(u"В том числе отправленные")
 		self.clearMessages.setCheckBox(self.deleteAll)
+
+		self.clearXT=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, u"Подтверждение", u"Удалить данные /x/t?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
 		self.setupClientConfig()
 		self.setupServersConfig()
 		self.setupMenu()
+		self.setupHelp()
 
 	def exc(self,cmd):
 		exec compile(cmd, "<string>", "exec")
@@ -252,7 +254,24 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			else:
 				self.mbox.setText(u"Удалять нечего")
 			self.mbox.exec_()
-	
+
+	def deleteXT(self):
+		answer=self.clearXT.exec_()
+		counter=0
+
+		if answer == QtWidgets.QMessageBox.Yes:
+			for filename in os.listdir(paths.datadir):
+				if filename[:5]=="base-":
+					print "rm "+filename
+					counter+=1
+					os.remove(os.path.join(paths.datadir, filename))
+			
+			if counter>0:
+				self.mbox.setText(u"Удалено файлов: "+str(counter))
+			else:
+				self.mbox.setText(u"Удалять нечего")
+			self.mbox.exec_()
+
 	def setupMenu(self):
 		self.clMenu=QtWidgets.QMenu()
 
@@ -260,11 +279,15 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		serversSettingsAction=QtWidgets.QAction("Настройки станций", self)
 		saveSettingsAction=QtWidgets.QAction("Сохранить настройки", self)
 		deleteTossesAction=QtWidgets.QAction("Удалить исходящие", self)
+		deleteXTAction=QtWidgets.QAction("Удалить данные /x/t", self)
+		helpAction=QtWidgets.QAction("Справка", self)
 		
 		clientSettingsAction.triggered.connect(self.execClientConfig)
 		serversSettingsAction.triggered.connect(self.execServersConfig)
 		saveSettingsAction.triggered.connect(self.saveChanges)
 		deleteTossesAction.triggered.connect(self.deleteTosses)
+		deleteXTAction.triggered.connect(self.deleteXT)
+		helpAction.triggered.connect(self.showHelp)
 
 		self.clMenu.addAction(clientSettingsAction)
 		self.clMenu.addAction(serversSettingsAction)
@@ -272,6 +295,10 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(deleteTossesAction)
+		self.clMenu.addAction(deleteXTAction)
+
+		self.clMenu.addSeparator()
+		self.clMenu.addAction(helpAction)
 
 	def callMenu(self):
 		mpos = QtGui.QCursor
@@ -364,6 +391,24 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		else:
 			self.mbox.setText("Упс, сохранить не получилось, смотри в логи.")
 		return self.mbox.exec_()
+	
+	def setupHelp(self):
+		helpfile=open("readme.html").read()
+		self.helpWindow=uic.loadUi("qtgui-files/readhelp.ui")
+		self.helpWindow.textBrowser.setHtml(helpfile)
+
+		pm1=QtGui.QPixmap("artwork/iilogo.png")
+		self.pm2=QtGui.QPixmap("artwork/iipony.png")
+		self.helpWindow.label_2.setPixmap(pm1)
+		self.helpWindow.label_2.mouseReleaseEvent = self.setnext
+
+		self.helpWindow.textBrowser.anchorClicked.connect(openLink)
+
+	def showHelp(self):
+		self.helpWindow.show()
+	
+	def setnext(self,e):
+		self.helpWindow.label_2.setPixmap(self.pm2)
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()
