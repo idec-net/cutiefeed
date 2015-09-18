@@ -124,7 +124,6 @@ class Form(QtWidgets.QMainWindow):
 		self.setWindowIcon(windowIcon)
 
 		self.resize(400,500)
-		self.mainwindow()
 		global slf,msglist,msgnumber,listlen
 		slf=self
 		self.mbox=QtWidgets.QMessageBox()
@@ -142,6 +141,7 @@ class Form(QtWidgets.QMainWindow):
 		self.setupServersConfig()
 		self.setupMenu()
 		self.setupHelp()
+		self.mainwindow()
 
 	def exc(self,cmd):
 		exec compile(cmd, "<string>", "exec")
@@ -151,7 +151,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
-		self.menuButton.clicked.connect(self.callMenu)
+		self.menuButton.setMenu(self.clMenu)
 
 		def addButtons(echoareas):
 			for i in range(0,len(echoareas)):
@@ -200,7 +200,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.pushButton_6.clicked.connect(c_writeNew)
 		self.pushButton_7.clicked.connect(self.getNewText)
 
-		self.menuButton.clicked.connect(self.callMenu)
+		self.menuButton.setMenu(self.clMenu)
 		self.textBrowser.anchorClicked.connect(openLink)
 
 	def getDialog(self):
@@ -300,13 +300,6 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(helpAction)
 
-	def callMenu(self):
-		mpos = QtGui.QCursor
-		x = mpos.pos().x()
-		y = mpos.pos().y()
-		self.clMenu.setGeometry( x-20, y-20, 0, 0)
-		self.clMenu.exec_()
-
 	def setupClientConfig(self):
 		self.clientConfig=uic.loadUi("qtgui-files/clientconfig.ui")
 		self.clientConfig.listWidget.itemDoubleClicked.connect(editItem)
@@ -319,13 +312,31 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 
 	def setupServersConfig(self):
 		self.serversConfig=uic.loadUi("qtgui-files/stations.ui")
+
+		self.serversConfig.tabBar=QtWidgets.QTabBar(self.serversConfig)
+		self.serversConfig.tabBar.setMovable(True)
+
+		self.serversConfig.horizontalLayout.addWidget(self.serversConfig.tabBar)
+		self.serversConfig.horizontalLayout.addWidget(self.serversConfig.addTabButton)
+		self.serversConfig.horizontalLayout.addWidget(self.serversConfig.deleteTabButton)
+
+		for i in range(len(servers)):
+			self.serversConfig.tabBar.addTab(str(i+1))
+
+		self.oldCurrentTab=0
+		self.serversConfig.tabBar.currentChanged.connect(self.updateInfo_servers_fromTab)
+		self.serversConfig.tabBar.tabMoved.connect(self.tabMovedEvent)
+
 		self.serversConfig.listWidget.itemDoubleClicked.connect(editItem)
 		self.serversConfig.pushButton.clicked.connect(addItem) # кнопка Добавить
 		self.serversConfig.pushButton_2.clicked.connect(deleteItem) # кнопка Удалить
 		self.serversConfig.pushButton_3.clicked.connect(itemUp) # кнопка Вверх
 		self.serversConfig.pushButton_4.clicked.connect(itemDown) # кнопка Вниз
 
-		self.serversConfig.accepted.connect(self.applyServersConfig)
+		self.serversConfig.addTabButton.clicked.connect(self.tabAddRequest)
+		self.serversConfig.deleteTabButton.clicked.connect(self.tabDeleteRequest)
+
+		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
 	
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
@@ -335,8 +346,9 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		if (len(config["offline-echoareas"])>0):
 			self.clientConfig.listWidget.setCurrentRow(0)
 
-	def loadInfo_servers(self):
-		curr=servers[0]
+	def loadInfo_servers(self, index=0):
+		curr=servers[index]
+
 		self.serversConfig.lineEdit.setText(curr["adress"])
 		self.serversConfig.lineEdit_2.setText(curr["authstr"])
 		self.serversConfig.listWidget.clear()
@@ -351,15 +363,21 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 			checkState=2 # ставим, что чекбокс нажат
 
 		self.serversConfig.checkBox.setCheckState(checkState)
-
+	
 	def execClientConfig(self):
 		self.loadInfo_client()
 		self.currLw=self.clientConfig.listWidget
 		self.clientConfig.exec_()
 	
 	def execServersConfig(self):
-		self.loadInfo_servers()
+		self.serversConfig.tabBar.setCurrentIndex(0)
+		self.loadInfo_servers(0)
+		self.oldCurrentTab=0
 		self.currLw=self.serversConfig.listWidget
+
+		for i in range(len(servers)):
+			self.serversConfig.tabBar.setTabText(i, str(i+1))
+		
 		self.serversConfig.exec_()
 	
 	def applyClientConfig(self):
@@ -371,18 +389,27 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		for index in range(0,count):
 			config["offline-echoareas"].append(self.clientConfig.listWidget.item(index).text())
 	
-	def applyServersConfig(self):
-		servers[0]["adress"]=self.serversConfig.lineEdit.text()
-		servers[0]["authstr"]=self.serversConfig.lineEdit_2.text()
-		servers[0]["xtenable"]=self.serversConfig.checkBox.isChecked()
+	def applyServersConfig(self, index=0):
+		servers[index]["adress"]=self.serversConfig.lineEdit.text()
+		servers[index]["authstr"]=self.serversConfig.lineEdit_2.text()
+		servers[index]["xtenable"]=self.serversConfig.checkBox.isChecked()
 
-		servers[0]["echoareas"]=[]
+		servers[index]["echoareas"]=[]
 		count=self.serversConfig.listWidget.count()
 		
-		for index in range(0,count):
-			servers[0]["echoareas"].append(self.serversConfig.listWidget.item(index).text())
+		for itemNumber in range(0,count):
+			servers[index]["echoareas"].append(self.serversConfig.listWidget.item(itemNumber).text())
 
 		config["servers"]=servers
+	
+	def applyServersConfigFromButton(self):
+		curr=self.serversConfig.tabBar.currentIndex()
+		self.applyServersConfig(curr)
+
+	def updateInfo_servers_fromTab(self, index=0):
+		self.applyServersConfig(self.oldCurrentTab)
+		self.oldCurrentTab=index
+		self.loadInfo_servers(index)
 
 	def saveChanges(self):
 		result=saveConfig()
@@ -409,6 +436,21 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 	
 	def setnext(self,e):
 		self.helpWindow.label_2.setPixmap(self.pm2)
+	
+	def tabMovedEvent(self, first, second):
+		servers[first], servers[second] = servers[second], servers[first]
+		self.oldCurrentTab=self.serversConfig.tabBar.currentIndex()
+	
+	def tabAddRequest(self):
+		servers.append({"authstr":"", "adress":"http://your-station.ru/", "xtenable":False, "echoareas":[]})
+		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
+		self.serversConfig.tabBar.setCurrentIndex(newindex)
+	
+	def tabDeleteRequest(self):
+		currindex=self.serversConfig.tabBar.currentIndex()
+		self.serversConfig.tabBar.removeTab(currindex)
+		del servers[currindex]
+		self.loadInfo_servers(self.serversConfig.tabBar.currentIndex())
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()
