@@ -204,7 +204,7 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
 		
-		self.progress.reset()
+		#self.progress.reset()
 
 		self.pushButton.clicked.connect(self.mainwindow)
 		self.pushButton_2.clicked.connect(msgminus)
