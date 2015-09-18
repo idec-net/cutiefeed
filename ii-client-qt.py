@@ -127,15 +127,19 @@ class Form(QtWidgets.QMainWindow):
 		global slf,msglist,msgnumber,listlen
 		slf=self
 		self.mbox=QtWidgets.QMessageBox()
-		self.mbox.setText(u"")
+		self.mbox.setText("")
+
+		#self.progress=QtWidgets.QProgressDialog()
+		#self.progress.setWindowModality(1)
+		#self.progress.setCancelButton(None)
 
 		# настраиваем диалог удаления тоссов
 
-		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, u"Подтверждение", u"Удалить исходящие сообщения?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-		self.deleteAll=QtWidgets.QCheckBox(u"В том числе отправленные")
+		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить исходящие сообщения?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+		self.deleteAll=QtWidgets.QCheckBox("В том числе отправленные")
 		self.clearMessages.setCheckBox(self.deleteAll)
 
-		self.clearXT=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, u"Подтверждение", u"Удалить данные /x/t?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+		self.clearXT=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить данные /x/t?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
 		self.setupClientConfig()
 		self.setupServersConfig()
@@ -180,17 +184,27 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 
 		self.setWindowTitle(u"Просмотр сообщений: "+echoarea)
 	
+		#self.progress.setLabelText("Получение списка сообщений...")
+		#self.progress.forceShow()
+		#self.progress.setValue(0)
+
 		msglist=getMsgList(echoarea)
 		msglist.reverse()
 
 		msgnumber=0
-		listlen=len(msglist)-2
+		listlen=len(msglist)
 
-		for i in range(listlen+2):
+		#self.progress.setMaximum(listlen)
+		#self.progress.setLabelText("Парсинг заголовков...")
+		for i in range(listlen):
 			self.listWidget.addItem(getMsgEscape(msglist[i]).get('subj'))
+		#	if (i % 30 == 0):
+		#		self.progress.setValue(i)
 
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
+		
+		self.progress.reset()
 
 		self.pushButton.clicked.connect(self.mainwindow)
 		self.pushButton_2.clicked.connect(msgminus)
