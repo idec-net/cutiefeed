@@ -129,10 +129,6 @@ class Form(QtWidgets.QMainWindow):
 		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText("")
 
-		#self.progress=QtWidgets.QProgressDialog()
-		#self.progress.setWindowModality(1)
-		#self.progress.setCancelButton(None)
-
 		# настраиваем диалог удаления тоссов
 
 		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить исходящие сообщения?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -147,35 +143,21 @@ class Form(QtWidgets.QMainWindow):
 		self.setupHelp()
 		self.mainwindow()
 
-	def exc(self,cmd):
-		exec compile(cmd, "<string>", "exec")
-
 	def mainwindow(self):
 		setUIResize("qtgui-files/mainwindow.ui",self)
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
+		self.pushButton_3.clicked.connect(self.displayOfflineEchos)
 		self.menuButton.setMenu(self.clMenu)
 
-		def addButtons(echoareas):
-			for i in range(0,len(echoareas)):
-				cmd="self.but"""+str(i)+"=QtWidgets.QPushButton('"+echoareas[i]+"',self)"+"""
-def callb"""+str(i)+"(event):"+"""
-	slf.viewwindow('"""+echoareas[i]+"""')
-self.but"""+str(i)+".setFlat(True)"+"""
-self.but"""+str(i)+".clicked.connect(callb"+str(i)+""")
-self.verticalLayout.addWidget(self.but"""+str(i)+")"
-				self.exc(cmd)
-
 		for server in servers:
-			echoareas=server["echoareas"]
-			self.verticalLayout.addWidget(QtWidgets.QLabel(server["adress"], self))
-			addButtons(server["echoareas"])
+			self.comboBox.addItem(server["adress"])
 		
-		if(len(config["offline-echoareas"])>0):
-			self.verticalLayout.addWidget(QtWidgets.QLabel(u"Эхи без сервера", self))
-			addButtons(config["offline-echoareas"])
-
+		self.comboBox.currentIndexChanged.connect(self.loadEchoList)
+		self.listWidget.itemActivated.connect(self.openViewWindow)
+		self.loadEchoList()
+		
 	def viewwindow(self, echoarea):
 		global msglist,msgnumber,listlen,echo
 		echo=echoarea
@@ -184,28 +166,18 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 
 		self.setWindowTitle(u"Просмотр сообщений: "+echoarea)
 	
-		#self.progress.setLabelText("Получение списка сообщений...")
-		#self.progress.forceShow()
-		#self.progress.setValue(0)
-
 		msglist=getMsgList(echoarea)
 		msglist.reverse()
 
 		msgnumber=0
 		listlen=len(msglist)
 
-		#self.progress.setMaximum(listlen)
-		#self.progress.setLabelText("Парсинг заголовков...")
 		for i in range(listlen):
 			self.listWidget.addItem(getMsgEscape(msglist[i]).get('subj'))
-		#	if (i % 30 == 0):
-		#		self.progress.setValue(i)
 
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
 		
-		#self.progress.reset()
-
 		self.pushButton.clicked.connect(self.mainwindow)
 		self.pushButton_2.clicked.connect(msgminus)
 		self.pushButton_3.clicked.connect(msgplus)
@@ -378,6 +350,10 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 
 		self.serversConfig.checkBox.setCheckState(checkState)
 	
+	def loadEchoList(self, index=0):
+		self.listWidget.clear()
+		self.listWidget.addItems(servers[index]["echoareas"])
+	
 	def execClientConfig(self):
 		self.loadInfo_client()
 		self.currLw=self.clientConfig.listWidget
@@ -465,6 +441,14 @@ self.verticalLayout.addWidget(self.but"""+str(i)+")"
 		self.serversConfig.tabBar.removeTab(currindex)
 		del servers[currindex]
 		self.loadInfo_servers(self.serversConfig.tabBar.currentIndex())
+	
+	def openViewWindow(self, item):
+		echoarea=item.text()
+		self.viewwindow(echoarea)
+	
+	def displayOfflineEchos(self):
+		self.listWidget.clear()
+		self.listWidget.addItems(config["offline-echoareas"])
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()
