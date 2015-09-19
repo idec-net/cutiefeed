@@ -149,6 +149,7 @@ class Form(QtWidgets.QMainWindow):
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
 		self.pushButton_3.clicked.connect(self.displayOfflineEchos)
+		self.pushButton_4.clicked.connect(self.updateEchoList)
 		self.menuButton.setMenu(self.clMenu)
 
 		for server in servers:
@@ -354,6 +355,11 @@ class Form(QtWidgets.QMainWindow):
 		self.listWidget.clear()
 		self.listWidget.addItems(servers[index]["echoareas"])
 	
+	def updateEchoList(self):
+		self.listWidget.clear()
+		index=self.comboBox.currentIndex()
+		self.listWidget.addItems(servers[index]["echoareas"])
+	
 	def execClientConfig(self):
 		self.loadInfo_client()
 		self.currLw=self.clientConfig.listWidget
@@ -448,7 +454,9 @@ class Form(QtWidgets.QMainWindow):
 	
 	def displayOfflineEchos(self):
 		self.listWidget.clear()
-		self.listWidget.addItems(config["offline-echoareas"])
+		
+		if len(config["offline-echoareas"]) > 0:
+			self.listWidget.addItems(config["offline-echoareas"])
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()

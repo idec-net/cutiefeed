@@ -32,7 +32,9 @@
          <string>Меню</string>
         </property>
         <property name="icon">
-         <iconset theme="document-properties"/>
+         <iconset theme="document-properties">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -96,6 +98,22 @@
         </property>
         <property name="text">
          <string>Offline-эхи</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_4">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Обновить</string>
+        </property>
+        <property name="icon">
+         <iconset theme="reload"/>
         </property>
        </widget>
       </item>
