@@ -123,7 +123,6 @@ class Form(QtWidgets.QMainWindow):
 		windowIcon=QtGui.QIcon('artwork/iilogo.png')
 		self.setWindowIcon(windowIcon)
 
-		self.resize(400,500)
 		global slf,msglist,msgnumber,listlen
 		slf=self
 		self.mbox=QtWidgets.QMessageBox()
