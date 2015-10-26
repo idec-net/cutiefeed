@@ -13,3 +13,4 @@ msgdir=os.path.join(datadir, "msg/")
 tossesdir=os.path.join(datadir, "out/")
 
 configfile_default=os.path.join(cwd, "config.default.json")
+defaultEditorPath="./tossedit.py"

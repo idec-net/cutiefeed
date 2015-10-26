@@ -331,6 +331,8 @@ class Form(QtWidgets.QMainWindow):
 
 		if (len(config["offline-echoareas"])>0):
 			self.clientConfig.listWidget.setCurrentRow(0)
+		
+		self.clientConfig.checkBox.setChecked(config["defaultEditor"])
 
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
@@ -377,6 +379,7 @@ class Form(QtWidgets.QMainWindow):
 	
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
+		config["defaultEditor"]=self.clientConfig.checkBox.isChecked()
 		count=self.clientConfig.listWidget.count()
 
 		config["offline-echoareas"]=[]

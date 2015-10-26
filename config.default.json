@@ -25,5 +25,6 @@
 		"ii.soft.14",
 		"ii.dev.14"
 	],
-	"editor": "leafpad"
+	"editor": "leafpad",
+	"defaultEditor": true
 }

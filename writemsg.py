@@ -12,7 +12,12 @@ if(len(tosses)==0):
 lasttoss=tosses[len(tosses)-1]+1
 
 def openEditor(file):
-	p=subprocess.Popen(config["editor"]+" "+file, shell=True)
+	if (config["defaultEditor"]==True):
+		editor=paths.defaultEditorPath
+	else:
+		editor=config["editor"]
+	
+	p=subprocess.Popen(editor+" "+file, shell=True)
 
 def edit(message):
 	global lasttoss

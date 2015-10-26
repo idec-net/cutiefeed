@@ -52,6 +52,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string>Использовать встроенный редактор (рекомендуется)</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="frame_2">
      <property name="toolTip">
       <string>Оффлайн эхоконференции</string>
