@@ -93,7 +93,8 @@
         <string>Сохранить</string>
        </property>
        <property name="icon">
-        <iconset theme="document-save"/>
+        <iconset theme="document-save">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -103,17 +104,22 @@
         <string>Закрыть и удалить</string>
        </property>
        <property name="icon">
-        <iconset theme="edit-delete"/>
+        <iconset theme="edit-delete">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_3">
+       <property name="toolTip">
+        <string>Выйти без сохранения</string>
+       </property>
        <property name="text">
         <string>Закрыть</string>
        </property>
        <property name="icon">
-        <iconset theme="window-close"/>
+        <iconset theme="window-close">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>

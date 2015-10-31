@@ -30,6 +30,10 @@ class EditorForm(QtWidgets.QWidget):
 		self.pushButton.clicked.connect(self.saveFile)
 		self.pushButton_2.clicked.connect(self.closeAndDelete)
 		self.pushButton_3.clicked.connect(self.closeWithoutSaving)
+
+		self.pushButton.setShortcut(QtCore.Qt.CTRL + QtCore.Qt.Key_S)
+		self.plainTextEdit.setFocus()
+		self.plainTextEdit_1.setFocus()
 	
 	def getMsg_From_Source(self):
 		source=self.plainTextEdit.toPlainText().splitlines()
@@ -124,12 +128,7 @@ class EditorForm(QtWidgets.QWidget):
 			self.close()
 	
 	def closeWithoutSaving(self):
-		self.mbox.setText("Выйти без сохранения?")
-		self.mbox.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
-		result=self.mbox.exec_()
-
-		if result==QtWidgets.QMessageBox.Yes:
-			self.close()
+		self.close()
 
 if len(sys.argv[1:])>0:
 	app = QtWidgets.QApplication(sys.argv)
