@@ -14,7 +14,7 @@ import webbrowser
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
-quotetemplate=re.compile("^&gt;+.+$", re.MULTILINE)
+quotetemplate=re.compile(r"^\s?[a-zA-Z0-9_-]{0,20}(&gt;)+.+$", re.MULTILINE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
@@ -148,7 +148,7 @@ class Form(QtWidgets.QMainWindow):
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
 		self.pushButton_3.clicked.connect(self.displayOfflineEchos)
-		self.pushButton_4.clicked.connect(self.updateEchoList)
+		self.pushButton_4.clicked.connect(self.updateMainView)
 		self.menuButton.setMenu(self.clMenu)
 
 		for server in servers:
@@ -356,10 +356,14 @@ class Form(QtWidgets.QMainWindow):
 		self.listWidget.clear()
 		self.listWidget.addItems(servers[index]["echoareas"])
 	
-	def updateEchoList(self):
+	def updateMainView(self):
 		self.listWidget.clear()
 		index=self.comboBox.currentIndex()
 		self.listWidget.addItems(servers[index]["echoareas"])
+		
+		self.comboBox.clear()
+		for server in servers:
+			self.comboBox.addItem(server["adress"])
 	
 	def execClientConfig(self):
 		self.loadInfo_client()
