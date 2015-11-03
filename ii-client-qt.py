@@ -15,6 +15,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 quotetemplate=re.compile(r"^\s?[a-zA-Z0-9_-]{0,20}(&gt;)+.+$", re.MULTILINE)
+commenttemplate=re.compile(r"(^|\s+)(PS|P.S|ps|ЗЫ|З.Ы|\/\/|#).+$", re.MULTILINE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
@@ -107,9 +108,10 @@ def itemDown(event):
 		form.currLw.setCurrentRow(targetRow)
 
 def reparseMessage(string):
-	global urltemplate, quotetemplate
+	global urltemplate, quotetemplate, commenttemplate
 	string=urltemplate.sub(u"<a href='\g<0>'>\g<0></a>", string)
 	string=quotetemplate.sub(u"<font color='green'>\g<0></font>", string)
+	string=commenttemplate.sub(u"<font color='brown'>\g<0></font>", string)
 	return string.replace("\n", "<br />")
 
 def openLink(link):
