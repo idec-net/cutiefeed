@@ -14,8 +14,8 @@ import webbrowser
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
-quotetemplate=re.compile(r"^\s?[a-zA-Z0-9_-]{0,20}(&gt;)+.+$", re.MULTILINE)
-commenttemplate=re.compile(r"(^|\s+)(PS|P.S|ps|ЗЫ|З.Ы|\/\/|#).+$", re.MULTILINE)
+quotetemplate=re.compile(ur"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
+commenttemplate=re.compile(ur"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
