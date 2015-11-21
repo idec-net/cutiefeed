@@ -9,7 +9,7 @@
 				"lor-opennet.15",
 				"mlp.15"
 			],
-			"xtenable":true
+			"xcenable":true
 		},
 		{
 			"adress": "http://spline.rooker.ru/ii/ii-point.php?q=/",
@@ -18,7 +18,7 @@
 				"spline.creepy.14",
 				"spline.local.14"
 			],
-			"xtenable":false
+			"xcenable":false
 		}
 	],
 	"offline-echoareas": [
@@ -26,5 +26,6 @@
 		"ii.dev.14"
 	],
 	"editor": "leafpad",
-	"defaultEditor": true
+	"defaultEditor": true,
+	"firstrun": true
 }

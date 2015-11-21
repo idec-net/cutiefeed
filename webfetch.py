@@ -17,36 +17,36 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch, xtenable=False):
+def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 	if(len(firstEchoesToFetch)==0):
 		return []
-	if(xtenable):
-		xtfile=paths.datadir+"base-"+hsh(adress)
+	if(xcenable):
+		xcfile=paths.datadir+"base-"+hsh(adress)
 		donot=[]
 		try:
-			f=open(xtfile).read().splitlines()
+			f=open(xcfile).read().splitlines()
 		except:
-			touch(xtfile)
-			open(xtfile, "w").write("\n".join([x+":0" for x in firstEchoesToFetch]))
+			touch(xcfile)
+			open(xcfile, "w").write("\n".join([x+":0" for x in firstEchoesToFetch]))
 			f=False
 		if(f):
-			remotextget=getfile(adress+"x/t/"+"/".join(firstEchoesToFetch))
-			remotext=[x.split(":") for x in remotextget.splitlines()]
+			remotexcget=getfile(adress+"x/c/"+"/".join(firstEchoesToFetch))
+			remotexc=[x.split(":") for x in remotexcget.splitlines()]
 				
-			if(len(f)==len(remotext)):
-				xtdict={}
-				for x in remotext:
-					xtdict[x[0]]=int(x[1])
+			if(len(f)==len(remotexc)):
+				xcdict={}
+				for x in remotexc:
+					xcdict[x[0]]=int(x[1])
 				localdict={}
 				for x in [i.split(":") for i in f]:
 					localdict[x[0]]=int(x[1])
 			
 				for echo in firstEchoesToFetch:
-					if int(xtdict[echo])==int(localdict[echo]):
+					if int(xcdict[echo])==int(localdict[echo]):
 						donot.append(echo)
 						print "removed "+echo
 				
-			open(xtfile, "w").write(remotextget)
+			open(xcfile, "w").write(remotexcget)
 			
 		echoesToFetch=[x for x in firstEchoesToFetch if x not in donot]
 	else:

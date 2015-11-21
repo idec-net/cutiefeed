@@ -136,12 +136,19 @@ class Form(QtWidgets.QMainWindow):
 		self.deleteAll=QtWidgets.QCheckBox("В том числе отправленные")
 		self.clearMessages.setCheckBox(self.deleteAll)
 
-		self.clearXT=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить данные /x/t?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+		self.clearXC=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить данные /x/c?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
 		self.setupClientConfig()
 		self.setupServersConfig()
 		self.setupMenu()
 		self.setupHelp()
+
+		# если запускаем клиент в первый раз, сначала показываются настройки
+		if (config["firstrun"]==True):
+			self.execServersConfig()
+			config["firstrun"]=False
+			self.saveChanges()
+		
 		self.mainwindow()
 
 	def mainwindow(self):
@@ -203,7 +210,7 @@ class Form(QtWidgets.QMainWindow):
 		
 		for server in servers:
 			try:
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xtenable"])
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"])
 				msgids+=msgidsNew
 			except Exception, e:
 				self.mbox.setText(server["adress"]+u': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e).decode("utf8"))
@@ -243,8 +250,8 @@ class Form(QtWidgets.QMainWindow):
 				self.mbox.setText(u"Удалять нечего")
 			self.mbox.exec_()
 
-	def deleteXT(self):
-		answer=self.clearXT.exec_()
+	def deleteXC(self):
+		answer=self.clearXC.exec_()
 		counter=0
 
 		if answer == QtWidgets.QMessageBox.Yes:
@@ -267,14 +274,14 @@ class Form(QtWidgets.QMainWindow):
 		serversSettingsAction=QtWidgets.QAction("Настройки станций", self)
 		saveSettingsAction=QtWidgets.QAction("Сохранить настройки", self)
 		deleteTossesAction=QtWidgets.QAction("Удалить исходящие", self)
-		deleteXTAction=QtWidgets.QAction("Удалить данные /x/t", self)
+		deleteXCAction=QtWidgets.QAction("Удалить данные /x/c", self)
 		helpAction=QtWidgets.QAction("Справка", self)
 		
 		clientSettingsAction.triggered.connect(self.execClientConfig)
 		serversSettingsAction.triggered.connect(self.execServersConfig)
 		saveSettingsAction.triggered.connect(self.saveChanges)
 		deleteTossesAction.triggered.connect(self.deleteTosses)
-		deleteXTAction.triggered.connect(self.deleteXT)
+		deleteXCAction.triggered.connect(self.deleteXC)
 		helpAction.triggered.connect(self.showHelp)
 
 		self.clMenu.addAction(clientSettingsAction)
@@ -283,7 +290,7 @@ class Form(QtWidgets.QMainWindow):
 		
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(deleteTossesAction)
-		self.clMenu.addAction(deleteXTAction)
+		self.clMenu.addAction(deleteXCAction)
 
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(helpAction)
@@ -335,6 +342,7 @@ class Form(QtWidgets.QMainWindow):
 			self.clientConfig.listWidget.setCurrentRow(0)
 		
 		self.clientConfig.checkBox.setChecked(config["defaultEditor"])
+		self.clientConfig.checkBox_2.setChecked(config["firstrun"])
 
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
@@ -349,7 +357,7 @@ class Form(QtWidgets.QMainWindow):
 
 		checkState=0
 
-		if curr["xtenable"]==True:
+		if curr["xcenable"]==True:
 			checkState=2 # ставим, что чекбокс нажат
 
 		self.serversConfig.checkBox.setCheckState(checkState)
@@ -386,6 +394,7 @@ class Form(QtWidgets.QMainWindow):
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
 		config["defaultEditor"]=self.clientConfig.checkBox.isChecked()
+		config["firstrun"]=self.clientConfig.checkBox_2.isChecked()
 		count=self.clientConfig.listWidget.count()
 
 		config["offline-echoareas"]=[]
@@ -396,7 +405,7 @@ class Form(QtWidgets.QMainWindow):
 	def applyServersConfig(self, index=0):
 		servers[index]["adress"]=self.serversConfig.lineEdit.text()
 		servers[index]["authstr"]=self.serversConfig.lineEdit_2.text()
-		servers[index]["xtenable"]=self.serversConfig.checkBox.isChecked()
+		servers[index]["xcenable"]=self.serversConfig.checkBox.isChecked()
 
 		servers[index]["echoareas"]=[]
 		count=self.serversConfig.listWidget.count()
@@ -446,7 +455,7 @@ class Form(QtWidgets.QMainWindow):
 		self.oldCurrentTab=self.serversConfig.tabBar.currentIndex()
 	
 	def tabAddRequest(self):
-		servers.append({"authstr":"", "adress":"http://your-station.ru/", "xtenable":False, "echoareas":[]})
+		servers.append({"authstr":"", "adress":"http://your-station.ru/", "xcenable":False, "echoareas":[]})
 		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
 		self.serversConfig.tabBar.setCurrentIndex(newindex)
 	

@@ -62,6 +62,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="checkBox_2">
+     <property name="text">
+      <string>Показать диалог настроек при следующем запуске</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="frame_2">
      <property name="toolTip">
       <string>Оффлайн эхоконференции</string>
