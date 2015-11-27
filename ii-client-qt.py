@@ -213,7 +213,6 @@ class Form(QtWidgets.QMainWindow):
 				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"])
 				msgids+=msgidsNew
 			except Exception as e:
-				raise
 				self.mbox.setText(server["adress"]+': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e))
 				self.mbox.exec_()
 		
