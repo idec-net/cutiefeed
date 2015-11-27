@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding:utf8 -*-
+#!/usr/bin/env python3
 
 from ii_functions import *
 from getcfg import *
@@ -23,15 +22,15 @@ def sendMessages():
 				authstr=server["authstr"]
 				break
 		
-		code=base64.b64encode(f)
+		code=base64.b64encode(bytes(f, "utf8"))
 		
-		data = urllib.urlencode({'tmsg': code,'pauth': authstr})
-		print adress
-		print authstr
-		out = urllib.urlopen(adress + 'u/point', data).read()
-		print out
+		data = urllib.parse.urlencode({'tmsg': code,'pauth': authstr}).encode("utf8")
+		print(adress)
+		print(authstr)
+		out = urllib.request.urlopen(adress + 'u/point', data).read()
+		print(out)
 		
-		if out.startswith('msg ok'):
+		if out.startswith(b'msg ok'):
 			countsent+=1
 			os.rename(paths.tossesdir+file+".toss", paths.tossesdir+file+".out")
 	return countsent

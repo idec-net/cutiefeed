@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
-# -*- coding:utf8 -*-
-import os, base64, urllib, subprocess, datetime, hashlib, cgi
+#!/usr/bin/env python3
+
+import os, base64, urllib.parse, urllib.request, subprocess, datetime, hashlib, cgi
 import paths
 
 def applyBlackList(str):
@@ -8,7 +8,7 @@ def applyBlackList(str):
 
 def getMsg(msgid):
 	try:
-		msg=open(paths.msgdir+msgid).read().decode('utf-8').splitlines()
+		msg=open(paths.msgdir+msgid).read().splitlines()
 		tags=parseTags(msg[0])
 		if('repto' in tags):
 			rpt=tags['repto']
@@ -37,12 +37,12 @@ def b64d(str):
 	return base64.b64decode(str)
 
 def hsh(str):
-	return base64.urlsafe_b64encode( hashlib.sha256(str).digest() ).replace('-','A').replace('_','z')[:20]
+	return base64.urlsafe_b64encode( hashlib.sha256(bytes(str, "utf8")).digest() ).decode("utf8").replace('-','A').replace('_','z')[:20]
 
 def getfile(file, quiet=False):
 	if (not quiet):
-		print "fetch "+file
-	return urllib.urlopen(file).read()
+		print("fetch "+file)
+	return urllib.request.urlopen(file).read().decode("utf8")
 
 def touch(fname):
 	if os.path.exists(fname):
@@ -53,17 +53,17 @@ def touch(fname):
 def savemsg(hash, echo, message):
 	touch(paths.msgdir+hash)
 	touch(paths.indexdir+echo)
-	open(paths.msgdir+hash, "w").write(message)
+	open(paths.msgdir+hash, "wb").write(message)
 	open(paths.indexdir+echo, "a").write(hash+"\n")
 
 def getMsgList(echo):
 	if(os.path.exists(paths.indexdir+echo)):
-		return open(paths.indexdir+echo).read().decode('utf-8').splitlines()
+		return open(paths.indexdir+echo).read().splitlines()
 	else:
 		return []
 
 def formatDate(time):
-	return datetime.datetime.fromtimestamp(int(time)).strftime("%Y-%m-%d (%A), %H:%M").decode("utf8")
+	return datetime.datetime.fromtimestamp(int(time)).strftime("%Y-%m-%d (%A), %H:%M")
 
 def parseTags(str):
 	arr=str.split("/")

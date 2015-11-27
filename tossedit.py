@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-# -*- coding:utf8 -*-
+#!/usr/bin/env python3
+
 import locale,sys
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -111,8 +111,8 @@ class EditorForm(QtWidgets.QWidget):
 		string=self.plainTextEdit.toPlainText()
 
 		try:
-			f=open(self.filename, "wb")
-			f.write(string.encode("utf8"))
+			f=open(self.filename, "w")
+			f.write(string)
 			f.close()
 		except:
 			self.mbox.setText("Файл "+self.filename+" сохранить не удалось =(")
@@ -136,4 +136,4 @@ if len(sys.argv[1:])>0:
 	form.show()
 	sys.exit(app.exec_())
 else:
-	print "Требуется имя файла!"
+	print("Требуется имя файла!")

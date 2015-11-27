@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-# -*- coding:utf8 -*-
+#!/usr/bin/env python3
+
 from ii_functions import *
 import paths
 
@@ -32,7 +32,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 		if(f):
 			remotexcget=getfile(adress+"x/c/"+"/".join(firstEchoesToFetch))
 			remotexc=[x.split(":") for x in remotexcget.splitlines()]
-				
+			
 			if(len(f)==len(remotexc)):
 				xcdict={}
 				for x in remotexc:
@@ -44,7 +44,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 				for echo in firstEchoesToFetch:
 					if int(xcdict[echo])==int(localdict[echo]):
 						donot.append(echo)
-						print "removed "+echo
+						print("removed "+echo)
 				
 			open(xcfile, "w").write(remotexcget)
 			
@@ -68,7 +68,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 		difference2d=[difference[i:i+20] for i in range(0, len(difference), 20)]
 		
 		for diff in difference2d:
-			print echo
+			print(echo)
 			impldifference="/".join(diff)
 			fullbundle=getfile(adress+"u/m/"+impldifference)
 	
@@ -77,7 +77,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 				arr=bundle.split(":")
 				if(arr[0]!="" and arr[1]!=""):
 					msgid=arr[0]; message=b64d(arr[1])
-					print "savemsg "+msgid
+					print("savemsg "+msgid)
 					savedMessages.append(msgid)
 					savemsg(msgid, echo, message)
 	return savedMessages

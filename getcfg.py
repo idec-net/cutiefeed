@@ -1,10 +1,10 @@
-#!/usr/bin/env python2
-# -*- coding:utf8 -*-
+#!/usr/bin/env python3
+
 import json, os, paths
 
 if (not os.path.exists(paths.configfile) and os.path.exists(paths.configfile_default)):
 	import shutil
-	print "Warning: could not find config. Trying to copy default one to it."
+	print("Warning: could not find config. Trying to copy default one to it.")
 	shutil.copyfile(paths.configfile_default, paths.configfile)
 
 try:
@@ -12,25 +12,25 @@ try:
 	config=json.load(configFile)
 	configFile.close()
 
-except Exception, e:
-	print "Caught exception: "+str(e)
-	print "Error: can't load config. Exiting."
+except Exception as e:
+	print("Caught exception: "+str(e))
+	print("Error: can't load config. Exiting.")
 	exit()
 
 servers=config["servers"]
-print "Config loaded"
+print("Config loaded")
 
 def saveConfig():
 	try:
 		configFile=open(paths.configfile, "w")
 		json.dump(config, configFile)
 		configFile.close()
-	except Exception, e:
-		print "Caught exception while saving: "+str(e)
+	except Exception as e:
+		print("Caught exception while saving: "+str(e))
 		return False
 	return True
 
 for directory in [paths.datadir, paths.indexdir, paths.msgdir, paths.tossesdir]:
 	if not os.path.exists(directory):
-		print "Directory "+directory+" does not exist. Creating..."
+		print("Directory "+directory+" does not exist. Creating...")
 		os.makedirs(directory)

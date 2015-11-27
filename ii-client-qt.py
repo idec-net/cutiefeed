@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-# -*- coding:utf8 -*-
+#!/usr/bin/env python3
+
 import locale,sys
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -14,8 +14,8 @@ import webbrowser
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
-quotetemplate=re.compile(ur"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
-commenttemplate=re.compile(ur"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
+quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
+commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
@@ -27,9 +27,9 @@ def updatemsg():
 	if(repto1):
 		repto=repto1
 	else:
-		repto=u"-"
+		repto="-"
 
-	msgtext="msgid: "+msgid_answer+"<br />"+u"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
+	msgtext="msgid: "+msgid_answer+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
 	slf.listWidget.setCurrentRow(msgnumber)
 	slf.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
@@ -58,10 +58,10 @@ def c_writeNew(event):
 def sendWrote(event):
 	try:
 		countsent=sender.sendMessages()
-		form.mbox.setText(u"Отправлено сообщений: "+str(countsent))
+		form.mbox.setText("Отправлено сообщений: "+str(countsent))
 		form.mbox.exec_()
-	except Exception,e:
-		form.mbox.setText(u"Ошибка отправки: "+str(e).decode("utf8"))
+	except Exception as e:
+		form.mbox.setText("Ошибка отправки: "+str(e))
 		form.mbox.exec_()
 
 def answer(event):
@@ -109,13 +109,13 @@ def itemDown(event):
 
 def reparseMessage(string):
 	global urltemplate, quotetemplate, commenttemplate
-	string=urltemplate.sub(u"<a href='\g<0>'>\g<0></a>", string)
-	string=quotetemplate.sub(u"<font color='green'>\g<0></font>", string)
-	string=commenttemplate.sub(u"<font color='brown'>\g<0></font>", string)
+	string=urltemplate.sub("<a href='\g<0>'>\g<0></a>", string)
+	string=quotetemplate.sub("<font color='green'>\g<0></font>", string)
+	string=commenttemplate.sub("<font color='brown'>\g<0></font>", string)
 	return string.replace("\n", "<br />")
 
 def openLink(link):
-	print "opening link in default browser"
+	print("opening link in default browser")
 	webbrowser.open(link.toString())
 
 class Form(QtWidgets.QMainWindow):
@@ -173,7 +173,7 @@ class Form(QtWidgets.QMainWindow):
 
 		setUIResize("qtgui-files/viewwindow.ui",self)
 
-		self.setWindowTitle(u"Просмотр сообщений: "+echoarea)
+		self.setWindowTitle("Просмотр сообщений: "+echoarea)
 	
 		msglist=getMsgList(echoarea)
 		msglist.reverse()
@@ -212,16 +212,17 @@ class Form(QtWidgets.QMainWindow):
 			try:
 				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"])
 				msgids+=msgidsNew
-			except Exception, e:
-				self.mbox.setText(server["adress"]+u': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e).decode("utf8"))
+			except Exception as e:
+				raise
+				self.mbox.setText(server["adress"]+': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e))
 				self.mbox.exec_()
 		
 		if len(msgids)==0:
-			self.mbox.setText(u'Новых сообщений нет.')
+			self.mbox.setText('Новых сообщений нет.')
 			self.mbox.exec_()
 		else:
 			self.getDialog()
-			htmlcode=u"Новые сообщения:"
+			htmlcode="Новые сообщения:"
 			for msgid in msgids:
 				arr=getMsgEscape(msgid)
 				htmlcode+="<br /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
@@ -234,20 +235,20 @@ class Form(QtWidgets.QMainWindow):
 		if answer == QtWidgets.QMessageBox.Yes:
 			if self.deleteAll.isChecked():
 				for filename in os.listdir(paths.tossesdir):
-					print "rm "+filename
+					print("rm "+filename)
 					counter+=1
 					os.remove(os.path.join(paths.tossesdir, filename))
 			else:
 				for filename in os.listdir(paths.tossesdir):
 					if filename[-5:]==".toss":
-						print "rm "+filename
+						print("rm "+filename)
 						counter+=1
 						os.remove(os.path.join(paths.tossesdir, filename))
 			
 			if counter>0:
-				self.mbox.setText(u"Удалено сообщений: "+str(counter))
+				self.mbox.setText("Удалено сообщений: "+str(counter))
 			else:
-				self.mbox.setText(u"Удалять нечего")
+				self.mbox.setText("Удалять нечего")
 			self.mbox.exec_()
 
 	def deleteXC(self):
@@ -257,14 +258,14 @@ class Form(QtWidgets.QMainWindow):
 		if answer == QtWidgets.QMessageBox.Yes:
 			for filename in os.listdir(paths.datadir):
 				if filename[:5]=="base-":
-					print "rm "+filename
+					print("rm "+filename)
 					counter+=1
 					os.remove(os.path.join(paths.datadir, filename))
 			
 			if counter>0:
-				self.mbox.setText(u"Удалено файлов: "+str(counter))
+				self.mbox.setText("Удалено файлов: "+str(counter))
 			else:
-				self.mbox.setText(u"Удалять нечего")
+				self.mbox.setText("Удалять нечего")
 			self.mbox.exec_()
 
 	def setupMenu(self):

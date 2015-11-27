@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: utf8 -*-
+#!/usr/bin/env python3
 
 import os
 

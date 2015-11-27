@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-# -*- config:utf8 -*-
+#!/usr/bin/env python3
+
 from ii_functions import *
 from getcfg import *
 import paths
@@ -23,7 +23,7 @@ def edit(message):
 	global lasttoss
 	fname=paths.tossesdir+str(lasttoss)+".toss"
 	touch(fname)
-	open(fname, "w").write(message.encode("utf8"))
+	open(fname, "w").write(message)
 	openEditor(fname)
 	lasttoss+=1
 
