@@ -27,5 +27,6 @@
 	],
 	"editor": "leafpad",
 	"defaultEditor": true,
-	"firstrun": true
+	"firstrun": true,
+	"autoSaveChanges": true
 }

@@ -170,9 +170,10 @@ class Form(QtWidgets.QMainWindow):
 
 		# если запускаем клиент в первый раз, сначала показываются настройки
 		if (config["firstrun"]==True):
-			self.execServersConfig()
 			config["firstrun"]=False
-			self.saveChanges()
+			self.execServersConfig()
+			if not config["autoSaveChanges"]:
+				self.saveChanges()
 		
 		self.mainwindow()
 
@@ -368,6 +369,7 @@ class Form(QtWidgets.QMainWindow):
 		
 		self.clientConfig.checkBox.setChecked(config["defaultEditor"])
 		self.clientConfig.checkBox_2.setChecked(config["firstrun"])
+		self.clientConfig.checkBox_3.setChecked(config["autoSaveChanges"])
 
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
@@ -420,12 +422,15 @@ class Form(QtWidgets.QMainWindow):
 		config["editor"]=self.clientConfig.lineEdit.text()
 		config["defaultEditor"]=self.clientConfig.checkBox.isChecked()
 		config["firstrun"]=self.clientConfig.checkBox_2.isChecked()
+		config["autoSaveChanges"]=self.clientConfig.checkBox_3.isChecked()
 		count=self.clientConfig.listWidget.count()
 
 		config["offline-echoareas"]=[]
 
 		for index in range(0,count):
 			config["offline-echoareas"].append(self.clientConfig.listWidget.item(index).text())
+
+		self.saveOrNot()
 	
 	def applyServersConfig(self, index=0):
 		servers[index]["adress"]=self.serversConfig.lineEdit.text()
@@ -439,6 +444,8 @@ class Form(QtWidgets.QMainWindow):
 			servers[index]["echoareas"].append(self.serversConfig.listWidget.item(itemNumber).text())
 
 		config["servers"]=servers
+		
+		self.saveOrNot()
 	
 	def applyServersConfigFromButton(self):
 		curr=self.serversConfig.tabBar.currentIndex()
@@ -457,6 +464,11 @@ class Form(QtWidgets.QMainWindow):
 			self.mbox.setText("Упс, сохранить не получилось, смотри в логи.")
 		return self.mbox.exec_()
 	
+	def saveOrNot(self): # смотрим, стоит ли автосохранение настроек
+		# если стоит, то сохраняем их
+		if config["autoSaveChanges"]:
+			self.saveChanges()
+
 	def setupHelp(self):
 		helpfile=open("readme.html").read()
 		self.helpWindow=uic.loadUi("qtgui-files/readhelp.ui")

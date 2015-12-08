@@ -18,6 +18,9 @@ except Exception as e:
 	exit()
 
 servers=config["servers"]
+if not "autoSaveChanges" in config.keys():
+	config["autoSaveChanges"]=True
+
 print("Config loaded")
 
 def saveConfig():

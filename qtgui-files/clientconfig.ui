@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>477</width>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,6 +55,16 @@
     <widget class="QCheckBox" name="checkBox">
      <property name="text">
       <string>Использовать встроенный редактор (рекомендуется)</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkBox_3">
+     <property name="text">
+      <string>Автосохранение настроек</string>
      </property>
      <property name="checked">
       <bool>true</bool>
