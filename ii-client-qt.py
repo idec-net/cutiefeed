@@ -16,6 +16,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
 commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
+ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,slf,msglist
@@ -108,15 +109,39 @@ def itemDown(event):
 		form.currLw.setCurrentRow(targetRow)
 
 def reparseMessage(string):
-	global urltemplate, quotetemplate, commenttemplate
+	global urltemplate, quotetemplate, commenttemplate, ii_link
 	string=urltemplate.sub("<a href='\g<0>'>\g<0></a>", string)
 	string=quotetemplate.sub("<font color='green'>\g<0></font>", string)
 	string=commenttemplate.sub("<font color='brown'>\g<0></font>", string)
-	return string.replace("\n", "<br />")
+	string=ii_link.sub("<a href='#\g<1>'>\g<0></a>", string)
+
+	strings=string.splitlines()
+	pre_flag=False
+
+	for i in range(0, len(strings)):
+		if strings[i]=="====":
+			if not pre_flag:
+				pre_flag=True
+				strings[i]="<pre style='font-family: monospace;'>===="
+			else:
+				pre_flag=False
+				strings[i]="====</pre>"
+	
+	return "<br />".join(strings)
 
 def openLink(link):
-	print("opening link in default browser")
-	webbrowser.open(link.toString())
+	global ii_link
+	link=link.toString()
+	
+	if (link.startswith("#")): # если перед нами ii-ссылка
+		link=link[1:] # срезаем первые ненужные символы
+		if "." in link:
+			form.viewwindow(link) # переходим в эху
+		else:
+			form.openMessageView(link) # смотрим сообщение
+	else:
+		print("opening link in default browser")
+		webbrowser.open(link)
 
 class Form(QtWidgets.QMainWindow):
 	def __init__(self):
@@ -474,6 +499,37 @@ class Form(QtWidgets.QMainWindow):
 		
 		if len(config["offline-echoareas"]) > 0:
 			self.listWidget.addItems(config["offline-echoareas"])
+	
+	def openMessageView(self, msgid):
+		global echo, msgid_answer # сохраняем msgid исходной эхи, чтобы
+		tmpecho=str(echo) # можно было бы отвечать на сообщения
+		tmpmsgid=str(msgid_answer) # после закрытия диалога
+
+		msg=getMsgEscape(msgid)
+		
+		repto1=msg.get('repto')
+
+		if(repto1):
+			repto=repto1
+		else:
+			repto="-"
+		
+		msgtext="msgid: "+msgid+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
+
+		msgid_answer=msgid # меняем глобальный msgid для
+		echo=msg.get('echo') # возможности ответить на сообщение
+
+		dialog=QtWidgets.QDialog(self)
+		uic.loadUi("qtgui-files/viewmessage.ui", dialog)
+		dialog.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
+		dialog.textBrowser.anchorClicked.connect(openLink)
+		dialog.AnswerButton.clicked.connect(answer)
+		dialog.exec_()
+
+		msgid_answer=tmpmsgid # возвращаем всё на свои места
+		echo=tmpecho
+
+		dialog.destroy()
 
 app = QtWidgets.QApplication(sys.argv)
 form=Form()
