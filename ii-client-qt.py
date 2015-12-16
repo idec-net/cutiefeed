@@ -236,7 +236,18 @@ class Form(QtWidgets.QMainWindow):
 		
 		for server in servers:
 			try:
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"])
+				if (not "advancedue" in server.keys()): # проверяем, если конфиг старый
+					server["advancedue"]=False
+					uelimit=False
+
+				if (server["advancedue"] == False):
+					uelimit=False
+				else:
+					uelimit=server["uelimit"]
+					# uelimit - сколько msgid скачивать максимум при наличии расширенной схемы
+					# если стоит в False, то скачиваем все
+
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit)
 				msgids+=msgidsNew
 			except Exception as e:
 				self.mbox.setText(server["adress"]+': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e))
@@ -358,6 +369,7 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.deleteTabButton.clicked.connect(self.tabDeleteRequest)
 
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
+		self.serversConfig.checkBox_2.stateChanged.connect(self.changeSpinBox)
 	
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
@@ -382,12 +394,13 @@ class Form(QtWidgets.QMainWindow):
 		if (len(curr["echoareas"])>0):
 			self.serversConfig.listWidget.setCurrentRow(0)
 
-		checkState=0
+		if (not "advancedue" in curr.keys()):
+			curr["advancedue"]=False
+			curr["uelimit"]=100
 
-		if curr["xcenable"]==True:
-			checkState=2 # ставим, что чекбокс нажат
-
-		self.serversConfig.checkBox.setCheckState(checkState)
+		self.serversConfig.checkBox.setChecked(curr["xcenable"])
+		self.serversConfig.checkBox_2.setChecked(curr["advancedue"])
+		self.serversConfig.spinBox.setValue(curr["uelimit"])
 	
 	def loadEchoList(self, index=0):
 		self.listWidget.clear()
@@ -436,6 +449,8 @@ class Form(QtWidgets.QMainWindow):
 		servers[index]["adress"]=self.serversConfig.lineEdit.text()
 		servers[index]["authstr"]=self.serversConfig.lineEdit_2.text()
 		servers[index]["xcenable"]=self.serversConfig.checkBox.isChecked()
+		servers[index]["advancedue"]=self.serversConfig.checkBox_2.isChecked()
+		servers[index]["uelimit"]=self.serversConfig.spinBox.value()
 
 		servers[index]["echoareas"]=[]
 		count=self.serversConfig.listWidget.count()
@@ -495,6 +510,12 @@ class Form(QtWidgets.QMainWindow):
 		servers.append({"authstr":"", "adress":"http://your-station.ru/", "xcenable":False, "echoareas":[]})
 		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
 		self.serversConfig.tabBar.setCurrentIndex(newindex)
+	
+	def changeSpinBox(self, state):
+		if (state == 0):
+			self.serversConfig.spinBox.setReadOnly(True)
+		else:
+			self.serversConfig.spinBox.setReadOnly(False)
 	
 	def tabDeleteRequest(self):
 		currindex=self.serversConfig.tabBar.currentIndex()

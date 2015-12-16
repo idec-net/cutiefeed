@@ -17,7 +17,7 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
+def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, from_msgid=False):
 	if(len(firstEchoesToFetch)==0):
 		return []
 	if(xcenable):
@@ -55,7 +55,11 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 	if(len(echoesToFetch)==0):
 		return []
 	
-	echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch))
+	if (fetch_limit != False):
+		echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(fetch_limit)+":"+str(fetch_limit))
+	else:
+		echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch))
+	
 	remoteEchos2d=parseFullEchoList(applyBlackList(echoBundle))
 	savedMessages=[]
 	
@@ -65,7 +69,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False):
 		remoteMessages=remoteEchos2d[echo]
 
 		difference=[i for i in remoteMessages if i not in localMessages]
-		difference2d=[difference[i:i+20] for i in range(0, len(difference), 20)]
+		difference2d=[difference[i:i+one_request_limit] for i in range(0, len(difference), one_request_limit)]
 		
 		for diff in difference2d:
 			print(echo)

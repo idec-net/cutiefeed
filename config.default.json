@@ -9,7 +9,9 @@
 				"lor-opennet.15",
 				"mlp.15"
 			],
-			"xcenable":true
+			"xcenable":true,
+			"advancedue":false,
+			"uelimit":200
 		},
 		{
 			"adress": "http://spline.rooker.ru/ii/ii-point.php?q=/",
@@ -18,7 +20,9 @@
 				"spline.creepy.14",
 				"spline.local.14"
 			],
-			"xcenable":false
+			"xcenable":false,
+			"advancedue":false,
+			"uelimit":100
 		}
 	],
 	"offline-echoareas": [
