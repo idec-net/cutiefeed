@@ -166,11 +166,18 @@ class Form(QtWidgets.QMainWindow):
 
 		self.newmsgq=queue.Queue()
 		self.errorsq=queue.Queue()
-		self.networkingThread=Thread()
-		self.setWindowIcon(windowIcon)
+		self.loadviewq=queue.Queue()
 
+		self.networkingThread=Thread()
+		self.loadViewThread=Thread()
+
+		self.setWindowIcon(windowIcon)
 		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText("")
+
+		self.progress=QtWidgets.QProgressDialog(self)
+		self.progress.setLabel(QtWidgets.QLabel("Подгружаем эху..."))
+		self.progress.hide()
 
 		# настраиваем диалог удаления тоссов
 
@@ -213,19 +220,19 @@ class Form(QtWidgets.QMainWindow):
 	def viewwindow(self, echoarea):
 		global msglist,msgnumber,listlen,echo
 		echo=echoarea
+		msgnumber=0
 
 		setUIResize("qtgui-files/viewwindow.ui",self)
 
 		self.setWindowTitle("Просмотр сообщений: "+echoarea)
-	
-		msglist=getMsgList(echoarea)
+
+		msglist=getMsgList(echo)
 		msglist.reverse()
 
-		msgnumber=0
 		listlen=len(msglist)
 
-		for i in range(listlen):
-			self.listWidget.addItem(getMsgEscape(msglist[i]).get('subj'))
+		self.progress.setMaximum(listlen-1)
+		self.processProgressBar(self.loadEchoBase)
 
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
@@ -274,6 +281,36 @@ class Form(QtWidgets.QMainWindow):
 		debugform.close()
 		self.show()
 		return self.newmsgq.get()
+
+	def loadEchoBase(self):
+		global msglist, listlen
+		with self.loadviewq.mutex:
+			self.loadviewq.queue.clear()
+
+		for i in range(listlen):
+			self.loadviewq.put_nowait([i,getMsgEscape(msglist[i]).get('subj')])
+
+	def processProgressBar(self, function):
+		self.setVisible(0)
+		self.progress.show()
+
+		self.loadViewThread=Thread(target=function)
+		self.loadViewThread.daemon=True
+		self.loadViewThread.start()
+
+		while True:
+			app.processEvents()
+
+			if (not self.loadviewq.empty() or self.loadViewThread.isAlive()):
+				element=self.loadviewq.get()
+				self.listWidget.addItem(element[1]) # это сабж вообще-то
+				self.progress.setValue(element[0]) # а это - значение прогрессбара
+			else:
+				break
+
+		self.loadViewThread.join()
+		self.setVisible(1)
+		self.progress.hide()
 
 	def getNewMessages(self):
 		msgids=[]
