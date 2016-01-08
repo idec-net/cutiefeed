@@ -10,6 +10,9 @@ import writemsg
 import sender
 import re
 import webbrowser
+from threading import Thread
+import ctypes
+import queue
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
@@ -19,7 +22,7 @@ commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILI
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
 
 def updatemsg():
-	global msgnumber,msgid_answer,slf,msglist
+	global msgnumber,msgid_answer,msglist
 	msgid_answer=msglist[msgnumber]
 	msg=getMsgEscape(msgid_answer)
 	
@@ -32,8 +35,8 @@ def updatemsg():
 
 	msgtext="msgid: "+msgid_answer+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
-	slf.listWidget.setCurrentRow(msgnumber)
-	slf.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
+	form.listWidget.setCurrentRow(msgnumber)
+	form.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
 
 def msgminus(event):
 	global msgnumber
@@ -48,21 +51,32 @@ def msgplus(event):
 		updatemsg()
 
 def lbselect():
-	global msgnumber,slf
-	msgnumber=slf.listWidget.currentRow()
+	global msgnumber
+	msgnumber=form.listWidget.currentRow()
 	updatemsg()
 
 def c_writeNew(event):
 	global echo
 	writemsg.writeNew(echo)
 
-def sendWrote(event):
+def sendWrote_operation():
+	countsent=0
 	try:
 		countsent=sender.sendMessages()
-		form.mbox.setText("Отправлено сообщений: "+str(countsent))
-		form.mbox.exec_()
+	except stoppedDownloadException as e:
+		form.newmsgq.put(e)
+		return
 	except Exception as e:
-		form.mbox.setText("Ошибка отправки: "+str(e))
+		form.newmsgq.put(e)
+		form.errorsq.put(["Ошибка отправки: ", e])
+		return
+	form.newmsgq.put(countsent)
+	
+def sendWrote(event):
+	result=form.processNewThread(sendWrote_operation)
+
+	if (not isinstance(result, Exception)):
+		form.mbox.setText("Отправлено сообщений: "+str(result))
 		form.mbox.exec_()
 
 def answer(event):
@@ -145,13 +159,16 @@ def openLink(link):
 
 class Form(QtWidgets.QMainWindow):
 	def __init__(self):
+		global msglist,msgnumber,listlen
 		super(Form, self).__init__()
 
 		windowIcon=QtGui.QIcon('artwork/iilogo.png')
+
+		self.newmsgq=queue.Queue()
+		self.errorsq=queue.Queue()
+		self.networkingThread=Thread()
 		self.setWindowIcon(windowIcon)
 
-		global slf,msglist,msgnumber,listlen
-		slf=self
 		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText("")
 
@@ -231,14 +248,40 @@ class Form(QtWidgets.QMainWindow):
 		self.pushButton_2.clicked.connect(self.mainwindow)
 		self.textBrowser.anchorClicked.connect(openLink)
 	
-	def getNewText(self):
+	def processNewThread(self, function):
+		if self.networkingThread.isAlive():
+			return
+
+		debugform.show()
+		self.hide()
+
+		self.networkingThread=Thread(target=function)
+		self.networkingThread.daemon=True
+		self.networkingThread.start()
+
+		while (self.networkingThread.isAlive()):
+			if (not gprintq.empty()):
+				debugform.addText(gprintq.get())
+			app.processEvents()
+		
+		while (not self.errorsq.empty()):
+			error=self.errorsq.get()
+			self.mbox.setText(error[0]+'\n\n'+str(error[1]))
+			self.mbox.exec_()
+
+		self.networkingThread.join()
+		
+		debugform.close()
+		self.show()
+		return self.newmsgq.get()
+
+	def getNewMessages(self):
 		msgids=[]
 		
 		for server in servers:
 			try:
 				if (not "advancedue" in server.keys()): # проверяем, если конфиг старый
 					server["advancedue"]=False
-					uelimit=False
 
 				if (server["advancedue"] == False):
 					uelimit=False
@@ -249,9 +292,15 @@ class Form(QtWidgets.QMainWindow):
 
 				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit)
 				msgids+=msgidsNew
+			except stoppedDownloadException:
+				break
 			except Exception as e:
-				self.mbox.setText(server["adress"]+': ошибка получения сообщений (проблемы с интернетом?).\n\n'+str(e))
-				self.mbox.exec_()
+				self.errorsq.put([server["adress"]+": ошибка получения сообщений (проблемы с интернетом?)", e])
+
+		self.newmsgq.put(msgids)
+	
+	def getNewText(self):
+		msgids=self.processNewThread(self.getNewMessages)
 		
 		if len(msgids)==0:
 			self.mbox.setText('Новых сообщений нет.')
@@ -564,7 +613,42 @@ class Form(QtWidgets.QMainWindow):
 
 		dialog.destroy()
 
+class debugForm(QtWidgets.QDialog):
+	def __init__(self):
+		super(debugForm, self).__init__()
+		setUIResize("qtgui-files/debugview.ui",self)
+		self.pushButton.clicked.connect(self.user_stop)
+	
+	def user_stop(self):
+		ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(form.networkingThread.ident),ctypes.py_object(stoppedDownloadException))
+	
+	def addText(sender, text):
+		debugform.textBrowser.append(text)
+
+	def closeEvent(self, event):
+		self.textBrowser.clear()
+		self.hide()
+		event.ignore()
+
+def my_print(func): # декоратор над стандартным питоновским print'ом
+	def wrapper(arg):
+		gprintq.put(arg)
+		func(arg)
+	return wrapper
+
+gprintq=queue.Queue()
+print=my_print(print) # теперь print - это уже не print =)
+webfetch.print=print
+sender.print=print
+
+class stoppedDownloadException(Exception):
+	def __init__(self):
+		super(stoppedDownloadException, self).__init__("Скачивание остановлено")
+
 app = QtWidgets.QApplication(sys.argv)
+
 form=Form()
+debugform=debugForm()
+
 form.show()
 sys.exit(app.exec_())

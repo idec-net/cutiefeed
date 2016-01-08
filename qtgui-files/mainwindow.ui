@@ -33,8 +33,7 @@
         </property>
         <property name="icon">
          <iconset theme="document-properties">
-          <normaloff/>
-         </iconset>
+          <normaloff>.</normaloff>.</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -113,7 +112,7 @@
          <string>Обновить</string>
         </property>
         <property name="icon">
-         <iconset theme="reload"/>
+         <iconset theme="view-refresh"/>
         </property>
        </widget>
       </item>

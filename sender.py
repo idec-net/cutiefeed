@@ -26,9 +26,8 @@ def sendMessages():
 		
 		data = urllib.parse.urlencode({'tmsg': code,'pauth': authstr}).encode("utf8")
 		print(adress)
-		print(authstr)
 		out = urllib.request.urlopen(adress + 'u/point', data).read()
-		print(out)
+		print(out.decode("utf8"))
 		
 		if out.startswith(b'msg ok'):
 			countsent+=1

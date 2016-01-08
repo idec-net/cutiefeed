@@ -39,11 +39,6 @@ def b64d(str):
 def hsh(str):
 	return base64.urlsafe_b64encode( hashlib.sha256(bytes(str, "utf8")).digest() ).decode("utf8").replace('-','A').replace('_','z')[:20]
 
-def getfile(file, quiet=False):
-	if (not quiet):
-		print("fetch "+file)
-	return urllib.request.urlopen(file).read().decode("utf8")
-
 def touch(fname):
 	if os.path.exists(fname):
 		os.utime(fname, None)

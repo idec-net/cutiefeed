@@ -3,6 +3,11 @@
 from ii_functions import *
 import paths
 
+def getfile(file, quiet=False):
+	if (not quiet):
+		print("fetch "+file)
+	return urllib.request.urlopen(file).read().decode("utf8")
+
 def parseFullEchoList(echobundle):
 	echos2d={}
 	echobundle=echobundle.splitlines()
