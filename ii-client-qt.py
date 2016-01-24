@@ -26,12 +26,10 @@ def updatemsg():
 	msgid_answer=msglist[msgnumber]
 	msg=getMsgEscape(msgid_answer)
 	
-	repto1=msg.get('repto')
-
-	if(repto1):
-		repto=repto1
-	else:
-		repto="-"
+	repto=msg.get("repto") or "-"
+		
+	if (repto!="-"):
+		repto="<a href='#"+repto+"'>"+repto+"</a>"
 
 	msgtext="msgid: "+msgid_answer+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
@@ -144,7 +142,6 @@ def reparseMessage(string):
 	return "<br />".join(strings)
 
 def openLink(link):
-	global ii_link
 	link=link.toString()
 	
 	if (link.startswith("#")): # если перед нами ii-ссылка
@@ -153,6 +150,11 @@ def openLink(link):
 			form.viewwindow(link) # переходим в эху
 		else:
 			form.openMessageView(link) # смотрим сообщение
+
+	elif (link.startswith("@")): # если это файл в каталоге out/
+		link=link[1:]
+		writemsg.openEditor(paths.tossesdir+link) # открываем редактор
+
 	else:
 		print("opening link in default browser")
 		webbrowser.open(link)
@@ -175,10 +177,6 @@ class Form(QtWidgets.QMainWindow):
 		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText("")
 
-		self.progress=QtWidgets.QProgressDialog(self)
-		self.progress.setLabel(QtWidgets.QLabel("Подгружаем эху..."))
-		self.progress.hide()
-
 		# настраиваем диалог удаления тоссов
 
 		self.clearMessages=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить исходящие сообщения?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -189,6 +187,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.setupClientConfig()
 		self.setupServersConfig()
+		self.setupUnsentView()
 		self.setupMenu()
 		self.setupHelp()
 
@@ -203,6 +202,10 @@ class Form(QtWidgets.QMainWindow):
 
 	def mainwindow(self):
 		setUIResize("qtgui-files/mainwindow.ui",self)
+
+		global echo, msgid_answer # для правильной работы открытия ii-ссылок в окне просмотра исходящих
+		echo="none"
+		msgid_answer="none"
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(sendWrote)
@@ -230,8 +233,6 @@ class Form(QtWidgets.QMainWindow):
 		msglist.reverse()
 
 		listlen=len(msglist)
-
-		self.progress.setMaximum(listlen-1)
 		self.processProgressBar(self.loadEchoBase)
 
 		self.listWidget.currentRowChanged.connect(lbselect)
@@ -292,6 +293,12 @@ class Form(QtWidgets.QMainWindow):
 
 	def processProgressBar(self, function):
 		self.setVisible(0)
+
+		self.progress=QtWidgets.QProgressDialog(self)
+		self.progress.setLabel(QtWidgets.QLabel("Подгружаем эху..."))
+		self.progress.setAutoClose(True)
+
+		self.progress.setMaximum(listlen-1)
 		self.progress.show()
 
 		self.loadViewThread=Thread(target=function)
@@ -311,6 +318,7 @@ class Form(QtWidgets.QMainWindow):
 		self.loadViewThread.join()
 		self.setVisible(1)
 		self.progress.hide()
+		self.progress.destroy()
 
 	def getNewMessages(self):
 		msgids=[]
@@ -348,7 +356,7 @@ class Form(QtWidgets.QMainWindow):
 			for msgid in msgids:
 				arr=getMsgEscape(msgid)
 				htmlcode+="<br /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
-			self.textBrowser.insertHtml(htmlcode)
+			self.textBrowser.setHtml(htmlcode)
 	
 	def deleteTosses(self):
 		answer=self.clearMessages.exec_()
@@ -399,6 +407,7 @@ class Form(QtWidgets.QMainWindow):
 		deleteTossesAction=QtWidgets.QAction("Удалить исходящие", self)
 		deleteXCAction=QtWidgets.QAction("Удалить данные /x/c", self)
 		helpAction=QtWidgets.QAction("Справка", self)
+		unsentViewAction=QtWidgets.QAction("Просмотр исходящих", self)
 		
 		clientSettingsAction.triggered.connect(self.execClientConfig)
 		serversSettingsAction.triggered.connect(self.execServersConfig)
@@ -406,6 +415,10 @@ class Form(QtWidgets.QMainWindow):
 		deleteTossesAction.triggered.connect(self.deleteTosses)
 		deleteXCAction.triggered.connect(self.deleteXC)
 		helpAction.triggered.connect(self.showHelp)
+		unsentViewAction.triggered.connect(self.execUnsentView)
+
+		self.clMenu.addAction(unsentViewAction)
+		self.clMenu.addSeparator()
 
 		self.clMenu.addAction(clientSettingsAction)
 		self.clMenu.addAction(serversSettingsAction)
@@ -457,6 +470,13 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
 		self.serversConfig.checkBox_2.stateChanged.connect(self.changeSpinBox)
 	
+	def setupUnsentView(self):
+		self.unsentView=uic.loadUi("qtgui-files/unsent.ui")
+		self.unsentView.pushButton.clicked.connect(sendWrote)
+		self.unsentView.pushButton_2.clicked.connect(self.deleteTosses)
+		self.unsentView.pushButton_3.clicked.connect(self.loadUnsentView)
+		self.unsentView.textBrowser.anchorClicked.connect(openLink)
+		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
 		self.clientConfig.listWidget.clear()
@@ -491,6 +511,36 @@ class Form(QtWidgets.QMainWindow):
 	def loadEchoList(self, index=0):
 		self.listWidget.clear()
 		self.listWidget.addItems(servers[index]["echoareas"])
+
+	def thread_loadUnsentView(self):
+		output=""
+
+		try:
+			print("get file list")
+			files=getOutList()
+			files.reverse()
+	
+			for msg in files:
+				print("loading "+msg)
+				s=getOutMsgEscape(msg)
+				repto=s.get("repto") or "-"
+				
+				if (repto!="-"):
+					repto="<a href='#"+repto+"'>"+repto+"</a>"
+	
+				output+="<a href='@"+msg+"'>"+msg+"</a><br />Ответ на: "+repto+"<br />"+s.get("echo")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))+"<br /><br />"
+		except Exception as e:
+			self.newmsgq.put(e)
+			self.errorsq.put(["Ошибка: ", e])
+			return
+		self.newmsgq.put(output)
+
+	def loadUnsentView(self):
+		output=self.processNewThread(self.thread_loadUnsentView)
+		
+		if (not isinstance(output, Exception)):
+			self.unsentView.textBrowser.clear()
+			self.unsentView.textBrowser.setHtml(output)
 	
 	def updateMainView(self):
 		self.listWidget.clear()
@@ -516,6 +566,10 @@ class Form(QtWidgets.QMainWindow):
 			self.serversConfig.tabBar.setTabText(i, str(i+1))
 		
 		self.serversConfig.exec_()
+	
+	def execUnsentView(self):
+		self.loadUnsentView()
+		self.unsentView.exec_()
 	
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
@@ -626,12 +680,10 @@ class Form(QtWidgets.QMainWindow):
 
 		msg=getMsgEscape(msgid)
 		
-		repto1=msg.get('repto')
-
-		if(repto1):
-			repto=repto1
-		else:
-			repto="-"
+		repto=msg.get("repto") or "-"
+			
+		if (repto!="-"):
+			repto="<a href='#"+repto+"'>"+repto+"</a>"
 		
 		msgtext="msgid: "+msgid+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 

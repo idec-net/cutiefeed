@@ -33,6 +33,40 @@ def getMsgEscape(msgid): # получаем сообщение и режем htm
 	
 	return m
 
+def getOutMsg(name):
+	try:
+		source=open(paths.tossesdir+name).read().splitlines()
+		
+		str=source[4]
+		if str.startswith("@repto:"):
+			repto=str[7:]
+			msgtext="\n".join(source[5:])
+		else:
+			repto=False
+			msgtext="\n".join(source[4:])
+		
+		meta=dict(echo=source[0], to=source[1], subj=source[2], repto=repto, msg=msgtext)
+	except:
+		meta=dict(echo="", to="All", subj="", repto=False, msg="")
+	return meta
+
+def getOutMsgEscape(name): # получаем сообщение и режем html в нужных частях
+	m=getOutMsg(name)
+	values=["echo", "to", "subj", "repto", "msg"]
+	for value in values:
+		if (type(m[value]) == bool): # для repto
+			continue
+
+		m[value]=cgi.escape(m[value], True)
+	
+	return m
+
+def getOutList():
+	files=os.listdir(paths.tossesdir)
+	files=[x for x in files if x.endswith(".toss") or x.endswith(".out")]
+	files.sort()
+	return files
+
 def b64d(str):
 	return base64.b64decode(str)
 
