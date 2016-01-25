@@ -502,6 +502,8 @@ class Form(QtWidgets.QMainWindow):
 
 		if (not "advancedue" in curr.keys()):
 			curr["advancedue"]=False
+
+		if (not "uelimit" in curr.keys()):
 			curr["uelimit"]=100
 
 		self.serversConfig.checkBox.setChecked(curr["xcenable"])
@@ -701,6 +703,12 @@ class Form(QtWidgets.QMainWindow):
 		echo=tmpecho
 
 		dialog.destroy()
+	
+	def closeEvent(self, event):
+		for obj in [self.clientConfig, self.serversConfig, self.unsentView, self.helpWindow]:
+			obj.destroy()
+		debugform.destroy()
+		event.accept()
 
 class debugForm(QtWidgets.QDialog):
 	def __init__(self):
