@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
-import os, base64, urllib.parse, urllib.request, subprocess, datetime, hashlib, cgi
+from socks import monkey_patch as socks_proxy_monkey_patch
+socks_proxy_monkey_patch.monkey_patch()
+
+import urllib.request, urllib.parse
+
+from socks import socks_proxy_context
+
+import os, base64, subprocess, datetime, hashlib, cgi
 import paths
 
 def applyBlackList(str):

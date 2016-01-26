@@ -30,7 +30,10 @@
 		"ii.dev.14"
 	],
 	"editor": "leafpad",
+	"proxy": "http://user:pass@localhost:8080",
+	"proxyType": "http",
 	"defaultEditor": true,
 	"firstrun": true,
-	"autoSaveChanges": true
+	"autoSaveChanges": true,
+	"useProxy": false
 }

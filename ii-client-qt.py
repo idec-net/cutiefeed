@@ -59,15 +59,18 @@ def c_writeNew(event):
 
 def sendWrote_operation():
 	countsent=0
+
+	proxy=None
+	if config["useProxy"]:
+		proxy={config["proxyType"]: config["proxy"]}
+
 	try:
-		countsent=sender.sendMessages()
+		countsent=sender.sendMessages(proxy)
 	except stoppedDownloadException as e:
 		form.newmsgq.put(e)
-		return
 	except Exception as e:
 		form.newmsgq.put(e)
 		form.errorsq.put(["Ошибка отправки: ", e])
-		return
 	form.newmsgq.put(countsent)
 	
 def sendWrote(event):
@@ -325,9 +328,6 @@ class Form(QtWidgets.QMainWindow):
 		
 		for server in servers:
 			try:
-				if (not "advancedue" in server.keys()): # проверяем, если конфиг старый
-					server["advancedue"]=False
-
 				if (server["advancedue"] == False):
 					uelimit=False
 				else:
@@ -335,7 +335,11 @@ class Form(QtWidgets.QMainWindow):
 					# uelimit - сколько msgid скачивать максимум при наличии расширенной схемы
 					# если стоит в False, то скачиваем все
 
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit)
+				proxy=None
+				if config["useProxy"]:
+					proxy={config["proxyType"]: config["proxy"]}
+
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, proxy=proxy)
 				msgids+=msgidsNew
 			except stoppedDownloadException:
 				break
@@ -479,6 +483,8 @@ class Form(QtWidgets.QMainWindow):
 		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
+		self.clientConfig.lineEdit_2.setText(config["proxy"])
+		self.clientConfig.lineEdit_3.setText(config["proxyType"])
 		self.clientConfig.listWidget.clear()
 		self.clientConfig.listWidget.addItems(config["offline-echoareas"])
 
@@ -488,6 +494,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clientConfig.checkBox.setChecked(config["defaultEditor"])
 		self.clientConfig.checkBox_2.setChecked(config["firstrun"])
 		self.clientConfig.checkBox_3.setChecked(config["autoSaveChanges"])
+		self.clientConfig.checkBox_4.setChecked(config["useProxy"])
 
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
@@ -499,12 +506,6 @@ class Form(QtWidgets.QMainWindow):
 
 		if (len(curr["echoareas"])>0):
 			self.serversConfig.listWidget.setCurrentRow(0)
-
-		if (not "advancedue" in curr.keys()):
-			curr["advancedue"]=False
-
-		if (not "uelimit" in curr.keys()):
-			curr["uelimit"]=100
 
 		self.serversConfig.checkBox.setChecked(curr["xcenable"])
 		self.serversConfig.checkBox_2.setChecked(curr["advancedue"])
@@ -575,9 +576,12 @@ class Form(QtWidgets.QMainWindow):
 	
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
+		config["proxy"]=self.clientConfig.lineEdit_2.text()
+		config["proxyType"]=self.clientConfig.lineEdit_3.text()
 		config["defaultEditor"]=self.clientConfig.checkBox.isChecked()
 		config["firstrun"]=self.clientConfig.checkBox_2.isChecked()
 		config["autoSaveChanges"]=self.clientConfig.checkBox_3.isChecked()
+		config["useProxy"]=self.clientConfig.checkBox_4.isChecked()
 		count=self.clientConfig.listWidget.count()
 
 		config["offline-echoareas"]=[]
@@ -649,7 +653,7 @@ class Form(QtWidgets.QMainWindow):
 		self.oldCurrentTab=self.serversConfig.tabBar.currentIndex()
 	
 	def tabAddRequest(self):
-		servers.append({"authstr":"", "adress":"http://your-station.ru/", "xcenable":False, "echoareas":[]})
+		servers.append(defaultServersValues)
 		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
 		self.serversConfig.tabBar.setCurrentIndex(newindex)
 	
