@@ -80,22 +80,6 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
-        <widget class="QTextBrowser" name="textBrowser">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="lineWrapMode">
-          <enum>QTextEdit::WidgetWidth</enum>
-         </property>
-         <property name="lineWrapColumnOrWidth">
-          <number>1</number>
-         </property>
-         <property name="openLinks">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>

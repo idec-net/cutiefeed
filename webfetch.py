@@ -38,7 +38,7 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, from_msgid=False, proxy=None):
+def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, from_msgid=False, proxy=None, callback=None):
 	if(len(firstEchoesToFetch)==0):
 		return []
 	if(xcenable):
@@ -100,9 +100,14 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 			bundles=fullbundle.splitlines()
 			for bundle in bundles:
 				arr=bundle.split(":")
+				bundleMsgids=[]
 				if(arr[0]!="" and arr[1]!=""):
 					msgid=arr[0]; message=b64d(arr[1])
 					print("savemsg "+msgid)
 					savedMessages.append(msgid)
+					bundleMsgids.append(msgid)
 					savemsg(msgid, echo, message)
+				if callback != None:
+					callback(bundleMsgids)
+					
 	return savedMessages

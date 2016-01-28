@@ -23,6 +23,10 @@ ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
 
 def updatemsg():
 	global msgnumber,msgid_answer,msglist
+
+	if len(msglist) == 0: # если мы в пустой эхе, кнопки нам не нужны
+		return
+	
 	msgid_answer=msglist[msgnumber]
 	msg=getMsgEscape(msgid_answer)
 	
@@ -163,6 +167,8 @@ def openLink(link):
 		webbrowser.open(link)
 
 class Form(QtWidgets.QMainWindow):
+	updateSignal=QtCore.pyqtSignal(str, name="update_signal")
+
 	def __init__(self):
 		global msglist,msgnumber,listlen
 		super(Form, self).__init__()
@@ -175,6 +181,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.networkingThread=Thread()
 		self.loadViewThread=Thread()
+		self.updateTB=Thread()
 
 		self.setWindowIcon(windowIcon)
 		self.mbox=QtWidgets.QMessageBox()
@@ -257,13 +264,14 @@ class Form(QtWidgets.QMainWindow):
 
 		self.pushButton.clicked.connect(self.getNewText)
 		self.pushButton_2.clicked.connect(self.mainwindow)
-		self.textBrowser.anchorClicked.connect(openLink)
+		self.newMsgTextBrowser.setParent(self)
+		self.verticalLayout.addWidget(self.newMsgTextBrowser)
 	
-	def processNewThread(self, function):
+	def processNewThread(self, function, takeResult=True):
 		if self.networkingThread.isAlive():
 			return
 
-		debugform.show()
+		debugform.appear()
 		self.hide()
 
 		self.networkingThread=Thread(target=function)
@@ -284,7 +292,9 @@ class Form(QtWidgets.QMainWindow):
 		
 		debugform.close()
 		self.show()
-		return self.newmsgq.get()
+		
+		if takeResult:
+			return self.newmsgq.get()
 
 	def loadEchoBase(self):
 		global msglist, listlen
@@ -324,8 +334,10 @@ class Form(QtWidgets.QMainWindow):
 		self.progress.destroy()
 
 	def getNewMessages(self):
-		msgids=[]
-		
+		def fx(msgids):
+			if len(msgids) > 0:
+				self.newmsgq.put(msgids)
+
 		for server in servers:
 			try:
 				if (server["advancedue"] == False):
@@ -339,28 +351,72 @@ class Form(QtWidgets.QMainWindow):
 				if config["useProxy"]:
 					proxy={config["proxyType"]: config["proxy"]}
 
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, proxy=proxy)
-				msgids+=msgidsNew
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, proxy=proxy, callback=fx)
 			except stoppedDownloadException:
 				break
 			except Exception as e:
 				self.errorsq.put([server["adress"]+": ошибка получения сообщений (проблемы с интернетом?)", e])
-
-		self.newmsgq.put(msgids)
 	
 	def getNewText(self):
-		msgids=self.processNewThread(self.getNewMessages)
+		self.newMsgTextBrowser=QtWidgets.QTextBrowser(None)
+		self.newMsgTextBrowser.anchorClicked.connect(openLink)
+		self.newMsgTextBrowser.setOpenLinks(False)
 		
-		if len(msgids)==0:
+		self.updateSignal.connect(self.newMsgTextBrowser.append, QtCore.Qt.QueuedConnection)
+
+		self.gotMsgs=False
+		self.windowFlag=False
+		def updateTextBrowser(signal):
+			while True:
+				if not self.newmsgq.empty():
+					if not self.gotMsgs:
+						self.newMsgTextBrowser.insertHtml("Новые сообщения:")
+						self.gotMsgs=True
+					msgids=self.newmsgq.get()
+					htmlcode=""
+					for msgid in msgids:
+						arr=getMsgEscape(msgid)
+						htmlcode+="<hr /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
+					signal.emit(htmlcode)
+				else:
+					if not self.networkingThread.isAlive():
+						return
+
+		if self.networkingThread.isAlive() or self.updateTB.isAlive():
+			return
+
+		debugform.appear()
+
+		self.networkingThread=Thread(target=self.getNewMessages)
+		self.networkingThread.daemon=True
+		self.networkingThread.start()
+
+		self.updateTB=Thread(target=updateTextBrowser, args=[self.updateSignal])
+		self.updateTB.daemon=True
+		self.updateTB.start()
+
+		while (self.networkingThread.isAlive()):
+			if self.gotMsgs and not self.windowFlag:
+				self.getDialog()
+				self.windowFlag=True
+			if (not gprintq.empty()):
+				debugform.addText(gprintq.get())
+			app.processEvents()
+		
+		while (not self.errorsq.empty()):
+			error=self.errorsq.get()
+			self.mbox.setText(error[0]+'\n\n'+str(error[1]))
+			self.mbox.exec_()
+
+		self.networkingThread.join()
+		self.updateTB.join()
+		
+		debugform.close()
+		
+		if not self.gotMsgs:
+			self.newMsgTextBrowser.destroy()
 			self.mbox.setText('Новых сообщений нет.')
 			self.mbox.exec_()
-		else:
-			self.getDialog()
-			htmlcode="Новые сообщения:"
-			for msgid in msgids:
-				arr=getMsgEscape(msgid)
-				htmlcode+="<br /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
-			self.textBrowser.setHtml(htmlcode)
 	
 	def deleteTosses(self):
 		answer=self.clearMessages.exec_()
@@ -709,7 +765,13 @@ class Form(QtWidgets.QMainWindow):
 		dialog.destroy()
 	
 	def closeEvent(self, event):
-		for obj in [self.clientConfig, self.serversConfig, self.unsentView, self.helpWindow]:
+		for obj in [
+			self.clientConfig,
+			self.serversConfig,
+			self.unsentView,
+			self.helpWindow,
+			self.clearXC
+		]:
 			obj.destroy()
 		debugform.destroy()
 		event.accept()
@@ -725,6 +787,10 @@ class debugForm(QtWidgets.QDialog):
 	
 	def addText(sender, text):
 		debugform.textBrowser.append(text)
+	
+	def appear(self):
+		debugform.textBrowser.clear()
+		debugform.show()
 
 	def closeEvent(self, event):
 		self.textBrowser.clear()
