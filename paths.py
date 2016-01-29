@@ -10,6 +10,7 @@ datadir=os.path.join(homedir, ".local/share/iicli-modular/")
 indexdir=os.path.join(datadir, "echo/")
 msgdir=os.path.join(datadir, "msg/")
 tossesdir=os.path.join(datadir, "out/")
+subjcachedir=os.path.join(datadir, "subjcache/")
 
 configfile_default=os.path.join(cwd, "config.default.json")
 defaultEditorPath="./tossedit.py"

@@ -21,6 +21,34 @@ quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE 
 commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
 
+def get_subj_cache(echo):
+	filename=os.path.join(paths.subjcachedir, echo)
+	try:
+		f=open(filename)
+		cache=f.read().splitlines()
+		f.close()
+		return cache
+	except:
+		touch(filename)
+		return []
+
+def cache_exists(echo):
+	filename=os.path.join(paths.subjcachedir, echo)
+	return os.path.exists(filename)
+
+def append_subj_cache(subj_data, echo):
+	if type(subj_data) == list:
+		subj_data="\n".join(subj_data)
+	try:
+		filename=os.path.join(paths.subjcachedir, echo)
+		f=open(filename, "a")
+		f.write(subj_data+"\n")
+		f.close()
+		return True
+	except:
+		print("error append cache")
+		return False
+
 def updatemsg():
 	global msgnumber,msgid_answer,msglist
 
@@ -204,6 +232,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clearMessages.setCheckBox(self.deleteAll)
 
 		self.clearXC=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить данные /x/c?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+		self.clearCache=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить кэш для эх?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
 		self.setupClientConfig()
 		self.setupServersConfig()
@@ -250,10 +279,10 @@ class Form(QtWidgets.QMainWindow):
 		self.setWindowTitle("Просмотр сообщений: "+echoarea)
 
 		msglist=getMsgList(echo)
-		msglist.reverse()
 
 		listlen=len(msglist)
 		self.processProgressBar(self.loadEchoBase)
+		msglist.reverse()
 
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
@@ -309,8 +338,18 @@ class Form(QtWidgets.QMainWindow):
 		with self.loadviewq.mutex:
 			self.loadviewq.queue.clear()
 
-		for i in range(listlen):
-			self.loadviewq.put_nowait([i,getMsgEscape(msglist[i]).get('subj')])
+		subjes=get_subj_cache(echo)
+
+		if len(subjes) != listlen:
+			cache=open(os.path.join(paths.subjcachedir, echo), "w")
+			for i in range(listlen):
+				subj=getMsgEscape(msglist[i]).get('subj')
+				self.loadviewq.put_nowait([i,subj])
+				cache.write(subj+"\n")
+			cache.close()
+		else:
+			for i in range(listlen):
+				self.loadviewq.put_nowait([i,subjes[i]])
 
 	def processProgressBar(self, function):
 		self.setVisible(0)
@@ -329,10 +368,13 @@ class Form(QtWidgets.QMainWindow):
 		while True:
 			app.processEvents()
 
-			if (not self.loadviewq.empty() or self.loadViewThread.isAlive()):
-				element=self.loadviewq.get()
-				self.listWidget.addItem(element[1]) # это сабж вообще-то
-				self.progress.setValue(element[0]) # а это - значение прогрессбара
+			queueFull=(not self.loadviewq.empty())
+			threadAlive=self.loadViewThread.isAlive()
+			if (queueFull or threadAlive):
+				if (queueFull):
+					element=self.loadviewq.get(timeout=5)
+					self.listWidget.insertItem(0, element[1]) # это сабж вообще-то
+					self.progress.setValue(element[0]) # а это - значение прогрессбара
 			else:
 				break
 
@@ -386,8 +428,12 @@ class Form(QtWidgets.QMainWindow):
 						arr=getMsgEscape(msgid)
 						msgid=arr.get('id')
 						echo=arr.get('echo')
+						subj=arr.get('subj')
+						
+						if cache_exists(echo):
+							append_subj_cache(subj, echo)
 
-						htmlcode+="<hr /><br /><a href='#ii:"+echo+"'>"+echo+"</a><br />msgid: <a href='#answer:"+msgid+"'>"+msgid+"</a><br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
+						htmlcode+="<hr /><br /><a href='#ii:"+echo+"'>"+echo+"</a><br />msgid: <a href='#answer:"+msgid+"'>"+msgid+"</a><br />"+formatDate(arr.get('time'))+"<br />"+subj+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
 					signal.emit(htmlcode)
 				else:
 					if not self.networkingThread.isAlive():
@@ -469,6 +515,22 @@ class Form(QtWidgets.QMainWindow):
 				self.mbox.setText("Удалять нечего")
 			self.mbox.exec_()
 
+	def deleteCache(self):
+		answer=self.clearCache.exec_()
+		counter=0
+
+		if answer == QtWidgets.QMessageBox.Yes:
+			for filename in os.listdir(paths.subjcachedir):
+				print("rm "+filename)
+				counter+=1
+				os.remove(os.path.join(paths.subjcachedir, filename))
+			
+			if counter>0:
+				self.mbox.setText("Удалено файлов: "+str(counter))
+			else:
+				self.mbox.setText("Удалять нечего")
+			self.mbox.exec_()
+
 	def setupMenu(self):
 		self.clMenu=QtWidgets.QMenu()
 
@@ -477,6 +539,7 @@ class Form(QtWidgets.QMainWindow):
 		saveSettingsAction=QtWidgets.QAction("Сохранить настройки", self)
 		deleteTossesAction=QtWidgets.QAction("Удалить исходящие", self)
 		deleteXCAction=QtWidgets.QAction("Удалить данные /x/c", self)
+		deleteCacheAction=QtWidgets.QAction("Удалить кэш тем", self)
 		helpAction=QtWidgets.QAction("Справка", self)
 		unsentViewAction=QtWidgets.QAction("Просмотр исходящих", self)
 		
@@ -485,6 +548,7 @@ class Form(QtWidgets.QMainWindow):
 		saveSettingsAction.triggered.connect(self.saveChanges)
 		deleteTossesAction.triggered.connect(self.deleteTosses)
 		deleteXCAction.triggered.connect(self.deleteXC)
+		deleteCacheAction.triggered.connect(self.deleteCache)
 		helpAction.triggered.connect(self.showHelp)
 		unsentViewAction.triggered.connect(self.execUnsentView)
 
@@ -498,6 +562,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(deleteTossesAction)
 		self.clMenu.addAction(deleteXCAction)
+		self.clMenu.addAction(deleteCacheAction)
 
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(helpAction)
@@ -782,7 +847,8 @@ class Form(QtWidgets.QMainWindow):
 			self.serversConfig,
 			self.unsentView,
 			self.helpWindow,
-			self.clearXC
+			self.clearXC,
+			self.clearCache
 		]:
 			obj.destroy()
 		debugform.destroy()

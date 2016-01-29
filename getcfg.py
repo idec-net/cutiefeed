@@ -64,7 +64,7 @@ def saveConfig():
 		return False
 	return True
 
-for directory in [paths.datadir, paths.indexdir, paths.msgdir, paths.tossesdir]:
+for directory in [paths.datadir, paths.indexdir, paths.msgdir, paths.tossesdir, paths.subjcachedir]:
 	if not os.path.exists(directory):
 		print("Directory "+directory+" does not exist. Creating...")
 		os.makedirs(directory)
