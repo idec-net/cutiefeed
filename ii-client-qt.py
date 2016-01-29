@@ -33,7 +33,7 @@ def updatemsg():
 	repto=msg.get("repto") or "-"
 		
 	if (repto!="-"):
-		repto="<a href='#"+repto+"'>"+repto+"</a>"
+		repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
 
 	msgtext="msgid: "+msgid_answer+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
@@ -132,7 +132,7 @@ def reparseMessage(string):
 	string=urltemplate.sub("<a href='\g<0>'>\g<0></a>", string)
 	string=quotetemplate.sub("<font color='green'>\g<0></font>", string)
 	string=commenttemplate.sub("<font color='brown'>\g<0></font>", string)
-	string=ii_link.sub("<a href='#\g<1>'>\g<0></a>", string)
+	string=ii_link.sub("<a href='#ii:\g<1>'>\g<0></a>", string)
 
 	strings=string.splitlines()
 	pre_flag=False
@@ -153,14 +153,24 @@ def openLink(link):
 	
 	if (link.startswith("#")): # если перед нами ii-ссылка
 		link=link[1:] # срезаем первые ненужные символы
-		if "." in link:
-			form.viewwindow(link) # переходим в эху
-		else:
-			form.openMessageView(link) # смотрим сообщение
+		data=link.split(":")
 
-	elif (link.startswith("@")): # если это файл в каталоге out/
-		link=link[1:]
-		writemsg.openEditor(paths.tossesdir+link) # открываем редактор
+		if not len(data) > 1:
+			print(data)
+			return
+		word=data[0]
+		link=data[1]
+
+		if word == "ii":
+			if "." in link:
+				form.viewwindow(link) # переходим в эху
+			else:
+				form.openMessageView(link) # смотрим сообщение
+		elif word == "out": # открываем редактор
+			writemsg.openEditor(paths.tossesdir+link)
+		elif word == "answer": # отвечаем на msgid
+			msg=getMsg(link)
+			writemsg.answer(msg.get("echo"), link)
 
 	else:
 		print("opening link in default browser")
@@ -272,7 +282,6 @@ class Form(QtWidgets.QMainWindow):
 			return
 
 		debugform.appear()
-		self.hide()
 
 		self.networkingThread=Thread(target=function)
 		self.networkingThread.daemon=True
@@ -291,7 +300,6 @@ class Form(QtWidgets.QMainWindow):
 		self.networkingThread.join()
 		
 		debugform.close()
-		self.show()
 		
 		if takeResult:
 			return self.newmsgq.get()
@@ -376,7 +384,10 @@ class Form(QtWidgets.QMainWindow):
 					htmlcode=""
 					for msgid in msgids:
 						arr=getMsgEscape(msgid)
-						htmlcode+="<hr /><br />"+arr.get('echo')+"<br />msgid: "+arr.get('id')+"<br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
+						msgid=arr.get('id')
+						echo=arr.get('echo')
+
+						htmlcode+="<hr /><br /><a href='#ii:"+echo+"'>"+echo+"</a><br />msgid: <a href='#answer:"+msgid+"'>"+msgid+"</a><br />"+formatDate(arr.get('time'))+"<br />"+arr.get('subj')+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
 					signal.emit(htmlcode)
 				else:
 					if not self.networkingThread.isAlive():
@@ -585,9 +596,9 @@ class Form(QtWidgets.QMainWindow):
 				repto=s.get("repto") or "-"
 				
 				if (repto!="-"):
-					repto="<a href='#"+repto+"'>"+repto+"</a>"
+					repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
 	
-				output+="<a href='@"+msg+"'>"+msg+"</a><br />Ответ на: "+repto+"<br />"+s.get("echo")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))+"<br /><br />"
+				output+="<a href='#out:"+msg+"'>"+msg+"</a><br />Ответ на: "+repto+"<br />"+s.get("echo")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))+"<br /><br />"
 		except Exception as e:
 			self.newmsgq.put(e)
 			self.errorsq.put(["Ошибка: ", e])
@@ -676,7 +687,8 @@ class Form(QtWidgets.QMainWindow):
 	def saveChanges(self):
 		result=saveConfig()
 		if result:
-			self.mbox.setText("Настройки сохранены")
+			if not config["autoSaveChanges"]: # чтобы не надоедало людям
+				self.mbox.setText("Настройки сохранены")
 		else:
 			self.mbox.setText("Упс, сохранить не получилось, смотри в логи.")
 		return self.mbox.exec_()
@@ -745,7 +757,7 @@ class Form(QtWidgets.QMainWindow):
 		repto=msg.get("repto") or "-"
 			
 		if (repto!="-"):
-			repto="<a href='#"+repto+"'>"+repto+"</a>"
+			repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
 		
 		msgtext="msgid: "+msgid+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
