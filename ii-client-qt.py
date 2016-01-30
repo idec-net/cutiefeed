@@ -13,6 +13,7 @@ import webbrowser
 from threading import Thread
 import ctypes
 import queue
+import json
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
@@ -20,6 +21,29 @@ urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
 commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
+
+def get_pos_cache():
+	try:
+		f=open(paths.echopositionfile)
+		pos_cache=json.load(f)
+		f.close()
+		return pos_cache
+	except:
+		return {}
+
+def get_position(echo, cache):
+	if not echo in cache.keys():
+		return None
+	else:
+		return cache[echo]
+
+def save_pos_cache(cache):
+	try:
+		f=open(paths.echopositionfile, "w")
+		json.dump(cache, f)
+		f.close()
+	except Exception as e:
+		print("Ошибка сохранения кэша позиции: "+str(e))
 
 def get_subj_cache(echo):
 	filename=os.path.join(paths.subjcachedir, echo)
@@ -50,9 +74,11 @@ def append_subj_cache(subj_data, echo):
 		return False
 
 def updatemsg():
-	global msgnumber,msgid_answer,msglist
+	global msgnumber,msgid_answer,msglist,echo
 
-	if len(msglist) == 0: # если мы в пустой эхе, кнопки нам не нужны
+	echocount=len(msglist)
+
+	if echocount == 0: # если мы в пустой эхе, кнопки нам не нужны
 		return
 	
 	msgid_answer=msglist[msgnumber]
@@ -67,6 +93,9 @@ def updatemsg():
 
 	form.listWidget.setCurrentRow(msgnumber)
 	form.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
+	
+	if config["rememberEchoPosition"] and form.echoPosition != None:
+		form.echoPosition[echo]=echocount-msgnumber
 
 def msgminus(event):
 	global msgnumber
@@ -233,6 +262,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.clearXC=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить данные /x/c?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 		self.clearCache=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить кэш для эх?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+		self.echoPosition=None
 
 		self.setupClientConfig()
 		self.setupServersConfig()
@@ -272,15 +302,26 @@ class Form(QtWidgets.QMainWindow):
 	def viewwindow(self, echoarea):
 		global msglist,msgnumber,listlen,echo
 		echo=echoarea
-		msgnumber=0
 
 		setUIResize("qtgui-files/viewwindow.ui",self)
-
+		
 		self.setWindowTitle("Просмотр сообщений: "+echoarea)
 
 		msglist=getMsgList(echo)
-
 		listlen=len(msglist)
+
+		if config["rememberEchoPosition"]:
+			if self.echoPosition == None:
+				self.echoPosition=get_pos_cache()
+			msgnumber=get_position(echo, self.echoPosition)
+			
+			if msgnumber == None or msgnumber >= listlen:
+				msgnumber = 0
+			else:
+				msgnumber = listlen - msgnumber
+		else:
+			msgnumber = 0
+
 		self.processProgressBar(self.loadEchoBase)
 		msglist.reverse()
 
@@ -520,10 +561,18 @@ class Form(QtWidgets.QMainWindow):
 		counter=0
 
 		if answer == QtWidgets.QMessageBox.Yes:
+			if os.path.exists(paths.echopositionfile):
+				print("rm "+paths.echopositionfile)
+				os.remove(paths.echopositionfile)
+				counter+=1
+
+			if self.echoPosition != None:
+				self.echoPosition=None
+
 			for filename in os.listdir(paths.subjcachedir):
 				print("rm "+filename)
-				counter+=1
 				os.remove(os.path.join(paths.subjcachedir, filename))
+				counter+=1
 			
 			if counter>0:
 				self.mbox.setText("Удалено файлов: "+str(counter))
@@ -627,6 +676,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clientConfig.checkBox_2.setChecked(config["firstrun"])
 		self.clientConfig.checkBox_3.setChecked(config["autoSaveChanges"])
 		self.clientConfig.checkBox_4.setChecked(config["useProxy"])
+		self.clientConfig.checkBox_5.setChecked(config["rememberEchoPosition"])
 
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
@@ -714,10 +764,11 @@ class Form(QtWidgets.QMainWindow):
 		config["firstrun"]=self.clientConfig.checkBox_2.isChecked()
 		config["autoSaveChanges"]=self.clientConfig.checkBox_3.isChecked()
 		config["useProxy"]=self.clientConfig.checkBox_4.isChecked()
-		count=self.clientConfig.listWidget.count()
+		config["rememberEchoPosition"]=self.clientConfig.checkBox_5.isChecked()
 
 		config["offline-echoareas"]=[]
 
+		count=self.clientConfig.listWidget.count()
 		for index in range(0,count):
 			config["offline-echoareas"].append(self.clientConfig.listWidget.item(index).text())
 
@@ -842,6 +893,9 @@ class Form(QtWidgets.QMainWindow):
 		dialog.destroy()
 	
 	def closeEvent(self, event):
+		if config["rememberEchoPosition"] and self.echoPosition != None:
+			save_pos_cache(self.echoPosition)
+
 		for obj in [
 			self.clientConfig,
 			self.serversConfig,

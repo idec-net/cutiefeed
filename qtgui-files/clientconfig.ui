@@ -140,6 +140,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="checkBox_5">
+     <property name="text">
+      <string>Запоминать последнее прочитанное в эхе</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="frame_2">
      <property name="toolTip">
       <string>Оффлайн эхоконференции</string>

@@ -35,5 +35,6 @@
 	"defaultEditor": true,
 	"firstrun": true,
 	"autoSaveChanges": true,
-	"useProxy": false
+	"useProxy": false,
+	"rememberEchoPosition": true
 }

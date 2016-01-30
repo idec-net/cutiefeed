@@ -11,6 +11,7 @@ indexdir=os.path.join(datadir, "echo/")
 msgdir=os.path.join(datadir, "msg/")
 tossesdir=os.path.join(datadir, "out/")
 subjcachedir=os.path.join(datadir, "subjcache/")
+echopositionfile=os.path.join(datadir, "positioncache.json")
 
 configfile_default=os.path.join(cwd, "config.default.json")
 defaultEditorPath="./tossedit.py"

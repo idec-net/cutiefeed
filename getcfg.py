@@ -29,7 +29,8 @@ defaultValues={
 	"defaultEditor": False,
 	"firstrun": True,
 	"autoSaveChanges": True,
-	"useProxy": False
+	"useProxy": False,
+	"rememberEchoPosition": True
 }
 
 defaultServersValues={

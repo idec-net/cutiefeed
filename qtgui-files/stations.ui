@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>468</height>
+    <width>499</width>
+    <height>497</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,8 @@
         <string>Новая станция</string>
        </property>
        <property name="icon">
-        <iconset theme="tab-new"/>
+        <iconset theme="tab-new">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -47,7 +48,8 @@
         <string>Удалить станцию</string>
        </property>
        <property name="icon">
-        <iconset theme="edit-delete"/>
+        <iconset theme="edit-delete">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -70,17 +72,20 @@
       </property>
       <item>
        <layout class="QFormLayout" name="formLayout">
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Пароль:</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
            <string>Станция:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="lineEdit"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Пароль:</string>
           </property>
          </widget>
         </item>
@@ -90,9 +95,6 @@
            <enum>QLineEdit::Password</enum>
           </property>
          </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="lineEdit"/>
         </item>
        </layout>
       </item>
@@ -138,6 +140,13 @@
           </property>
           <property name="maximum">
            <number>40000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_5">
+          <property name="text">
+           <string>Получить список эх с ноды</string>
           </property>
          </widget>
         </item>
