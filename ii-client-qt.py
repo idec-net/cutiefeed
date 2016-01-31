@@ -73,6 +73,20 @@ def append_subj_cache(subj_data, echo):
 		print("error append cache")
 		return False
 
+def load_raw_file(adress):
+	def loadFunction():
+		proxy=None
+		if config["useProxy"]:
+			proxy={config["proxyType"]: config["proxy"]}
+		try:
+			string=webfetch.getfile(adress, proxy)
+			form.newmsgq.put(string)
+		except Exception as e:
+			form.errorsq.put(["Ошибка отправки: ", e])
+			form.newmsgq.put("")
+	
+	return form.processNewThread(loadFunction)
+
 def updatemsg():
 	global msgnumber,msgid_answer,msglist,echo
 
@@ -267,6 +281,7 @@ class Form(QtWidgets.QMainWindow):
 		self.setupClientConfig()
 		self.setupServersConfig()
 		self.setupUnsentView()
+		self.setupAdditional()
 		self.setupMenu()
 		self.setupHelp()
 
@@ -586,15 +601,17 @@ class Form(QtWidgets.QMainWindow):
 		clientSettingsAction=QtWidgets.QAction("Настройки клиента", self)
 		serversSettingsAction=QtWidgets.QAction("Настройки станций", self)
 		saveSettingsAction=QtWidgets.QAction("Сохранить настройки", self)
+		additionalFeaturesAction=QtWidgets.QAction("Дополнительные фичи", self)
 		deleteTossesAction=QtWidgets.QAction("Удалить исходящие", self)
 		deleteXCAction=QtWidgets.QAction("Удалить данные /x/c", self)
-		deleteCacheAction=QtWidgets.QAction("Удалить кэш тем", self)
+		deleteCacheAction=QtWidgets.QAction("Удалить кэш", self)
 		helpAction=QtWidgets.QAction("Справка", self)
 		unsentViewAction=QtWidgets.QAction("Просмотр исходящих", self)
 		
 		clientSettingsAction.triggered.connect(self.execClientConfig)
 		serversSettingsAction.triggered.connect(self.execServersConfig)
 		saveSettingsAction.triggered.connect(self.saveChanges)
+		additionalFeaturesAction.triggered.connect(self.execAdditional)
 		deleteTossesAction.triggered.connect(self.deleteTosses)
 		deleteXCAction.triggered.connect(self.deleteXC)
 		deleteCacheAction.triggered.connect(self.deleteCache)
@@ -607,6 +624,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clMenu.addAction(clientSettingsAction)
 		self.clMenu.addAction(serversSettingsAction)
 		self.clMenu.addAction(saveSettingsAction)
+		self.clMenu.addAction(additionalFeaturesAction)
 		
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(deleteTossesAction)
@@ -648,6 +666,7 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.pushButton_2.clicked.connect(deleteItem) # кнопка Удалить
 		self.serversConfig.pushButton_3.clicked.connect(itemUp) # кнопка Вверх
 		self.serversConfig.pushButton_4.clicked.connect(itemDown) # кнопка Вниз
+		self.serversConfig.pushButton_5.clicked.connect(self.load_list_txt) # получение списка эх с ноды
 
 		self.serversConfig.addTabButton.clicked.connect(self.tabAddRequest)
 		self.serversConfig.deleteTabButton.clicked.connect(self.tabDeleteRequest)
@@ -661,6 +680,9 @@ class Form(QtWidgets.QMainWindow):
 		self.unsentView.pushButton_2.clicked.connect(self.deleteTosses)
 		self.unsentView.pushButton_3.clicked.connect(self.loadUnsentView)
 		self.unsentView.textBrowser.anchorClicked.connect(openLink)
+	
+	def setupAdditional(self):
+		self.additional=uic.loadUi("qtgui-files/additional.ui")
 		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
@@ -692,6 +714,12 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.checkBox.setChecked(curr["xcenable"])
 		self.serversConfig.checkBox_2.setChecked(curr["advancedue"])
 		self.serversConfig.spinBox.setValue(curr["uelimit"])
+	
+	def loadInfo_additional(self):
+		self.additional.comboBox.clear()
+		for server in servers:
+			self.additional.comboBox.addItem(server["adress"])
+		self.additional_update_echoes()
 	
 	def loadEchoList(self, index=0):
 		self.listWidget.clear()
@@ -735,6 +763,12 @@ class Form(QtWidgets.QMainWindow):
 		self.comboBox.clear()
 		for server in servers:
 			self.comboBox.addItem(server["adress"])
+
+	def additional_update_echoes(self):
+		self.additional.comboBox_2.clear()
+
+		echolist=os.listdir(paths.indexdir)
+		self.additional.comboBox_2.addItems(echolist)
 	
 	def execClientConfig(self):
 		self.loadInfo_client()
@@ -755,6 +789,10 @@ class Form(QtWidgets.QMainWindow):
 	def execUnsentView(self):
 		self.loadUnsentView()
 		self.unsentView.exec_()
+	
+	def execAdditional(self):
+		self.loadInfo_additional()
+		self.additional.exec_()
 	
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
@@ -791,6 +829,30 @@ class Form(QtWidgets.QMainWindow):
 		
 		self.saveOrNot()
 	
+	def load_list_txt(self):
+		rawlist=load_raw_file(self.serversConfig.lineEdit.text()+"list.txt")
+		echoes=[x.split(":") for x in rawlist.splitlines()]
+		list_dialog=uic.loadUi("qtgui-files/list.txt.ui")
+
+		model=QtGui.QStandardItemModel(len(echoes), 3)
+		list_dialog.tableView.setModel(model)
+
+		for row in range(len(echoes)):
+			for col in range(3):
+				index=model.index(row, col)
+				model.setData(index, echoes[row][col])
+
+		list_dialog.tableView.resizeRowsToContents()
+		list_dialog.tableView.resizeColumnsToContents()
+
+		answer=list_dialog.exec_()
+		if answer == 1:
+			self.serversConfig.listWidget.clear()
+			echoes=[x[0] for x in echoes]
+			self.serversConfig.listWidget.addItems(echoes)
+
+		list_dialog.destroy()
+
 	def applyServersConfigFromButton(self):
 		curr=self.serversConfig.tabBar.currentIndex()
 		self.applyServersConfig(curr)
@@ -900,6 +962,7 @@ class Form(QtWidgets.QMainWindow):
 			self.clientConfig,
 			self.serversConfig,
 			self.unsentView,
+			self.additional,
 			self.helpWindow,
 			self.clearXC,
 			self.clearCache
