@@ -82,10 +82,22 @@ def load_raw_file(adress):
 			string=webfetch.getfile(adress, proxy)
 			form.newmsgq.put(string)
 		except Exception as e:
-			form.errorsq.put(["Ошибка отправки: ", e])
+			form.errorsq.put(["Ошибка скачивания: ", e])
 			form.newmsgq.put("")
 	
 	return form.processNewThread(loadFunction)
+
+def delete(filename, verbose=True):
+	if(not os.path.exists(filename)):
+		if (verbose):
+			print("Файл "+filename+" не существует!")
+		return
+	try:
+		print("rm "+filename)
+		os.remove(filename)
+	except:
+		if(verbose):
+			print("Ошибка удаления, проверьте права")
 
 def updatemsg():
 	global msgnumber,msgid_answer,msglist,echo
@@ -538,15 +550,13 @@ class Form(QtWidgets.QMainWindow):
 		if answer == QtWidgets.QMessageBox.Yes:
 			if self.deleteAll.isChecked():
 				for filename in os.listdir(paths.tossesdir):
-					print("rm "+filename)
 					counter+=1
-					os.remove(os.path.join(paths.tossesdir, filename))
+					delete(os.path.join(paths.tossesdir, filename))
 			else:
 				for filename in os.listdir(paths.tossesdir):
 					if filename[-5:]==".toss":
-						print("rm "+filename)
 						counter+=1
-						os.remove(os.path.join(paths.tossesdir, filename))
+						delete(os.path.join(paths.tossesdir, filename))
 			
 			if counter>0:
 				self.mbox.setText("Удалено сообщений: "+str(counter))
@@ -561,9 +571,8 @@ class Form(QtWidgets.QMainWindow):
 		if answer == QtWidgets.QMessageBox.Yes:
 			for filename in os.listdir(paths.datadir):
 				if filename[:5]=="base-":
-					print("rm "+filename)
 					counter+=1
-					os.remove(os.path.join(paths.datadir, filename))
+					delete(os.path.join(paths.datadir, filename))
 			
 			if counter>0:
 				self.mbox.setText("Удалено файлов: "+str(counter))
@@ -577,16 +586,14 @@ class Form(QtWidgets.QMainWindow):
 
 		if answer == QtWidgets.QMessageBox.Yes:
 			if os.path.exists(paths.echopositionfile):
-				print("rm "+paths.echopositionfile)
-				os.remove(paths.echopositionfile)
+				delete(paths.echopositionfile)
 				counter+=1
 
 			if self.echoPosition != None:
 				self.echoPosition=None
 
 			for filename in os.listdir(paths.subjcachedir):
-				print("rm "+filename)
-				os.remove(os.path.join(paths.subjcachedir, filename))
+				delete(os.path.join(paths.subjcachedir, filename))
 				counter+=1
 			
 			if counter>0:
@@ -594,6 +601,53 @@ class Form(QtWidgets.QMainWindow):
 			else:
 				self.mbox.setText("Удалять нечего")
 			self.mbox.exec_()
+
+	def deleteOneEcho(self):
+		echoarea=self.additional.comboBox_2.currentText()
+
+		question=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить эху "+echoarea+"?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+
+		answer=question.exec_()
+		question.destroy()
+
+		if (answer == QtWidgets.QMessageBox.Yes):
+			global echo
+			if echo == echoarea:
+				self.mainwindow()
+
+			def function():
+				msglist=getMsgList(echoarea)
+				for msgid in msglist:
+					delete(os.path.join(paths.msgdir, msgid))
+				delete(os.path.join(paths.indexdir, echoarea))
+				delete(os.path.join(paths.subjcachedir, echoarea))
+			self.processNewThread(function, takeResult=False)
+			self.additional_update_echoes()
+	
+	def deleteAllEchoes(self):
+		countItems=self.additional.comboBox_2.count()
+
+		echoes=[]
+		for i in range(countItems):
+			echoes.append(self.additional.comboBox_2.itemText(i))
+
+		question=QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "Удалить ВСЮ БАЗУ ДАННЫХ?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+
+		answer=question.exec_()
+		question.destroy()
+
+		if (answer == QtWidgets.QMessageBox.Yes):
+			self.mainwindow()
+
+			def function():
+				for echo in echoes:
+					msglist=getMsgList(echo)
+					for msgid in msglist:
+						delete(os.path.join(paths.msgdir, msgid))
+					delete(os.path.join(paths.indexdir, echo))
+					delete(os.path.join(paths.subjcachedir, echo))
+			self.processNewThread(function, takeResult=False)
+			self.additional_update_echoes()
 
 	def setupMenu(self):
 		self.clMenu=QtWidgets.QMenu()
@@ -683,6 +737,8 @@ class Form(QtWidgets.QMainWindow):
 	
 	def setupAdditional(self):
 		self.additional=uic.loadUi("qtgui-files/additional.ui")
+		self.additional.pushButton_5.clicked.connect(self.deleteAllEchoes)
+		self.additional.pushButton_6.clicked.connect(self.deleteOneEcho)
 		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
