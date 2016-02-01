@@ -13,7 +13,7 @@ import webbrowser
 from threading import Thread
 import ctypes
 import queue
-import json, shutil
+import json, shutil, math
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
@@ -91,7 +91,7 @@ def prettier_size(n,pow=0,b=1024,u='B',pre=['']+[p+'i'for p in'KMGTPEZY']):
 	r,f=min(int(math.log(max(n*b**pow,1),b)),len(pre)-1),'{:,.%if} %s%s'
 	return (f%(abs(r%(-r-1)),pre[r],u)).format(n*b**pow/b**float(r))
 
-def xt_download(server, filename, signal):
+def xfile_download(server, filename):
 	data = urllib.parse.urlencode({'pauth': server["authstr"], 'filename':filename}).encode('utf8')
 	out = urllib.request.urlopen(server["adress"] + 'x/file', data)
 	
@@ -106,18 +106,28 @@ def xt_download(server, filename, signal):
 		file_size+=len(buffer)
 		f.write(buffer)
 	f.close()
-	print("Скачали "+str(prettier_size(file_size)))
+	mbox("Скачали "+str(prettier_size(file_size)))
 
-def xt_getlist(server):
+def xfile_getlist(server):
 	data = urllib.parse.urlencode({'pauth': server["authstr"]}).encode('utf8')
-	files = urllib.request.urlopen(server["adress"] + 'x/file', data).read().splitlines()
+	try:
+		files = urllib.request.urlopen(server["adress"] + 'x/file', data).read().splitlines()
+	except Exception as e:
+		form.errorsq.put(["Ошибка скачивания: ", e])
+		form.newmsgq.put(None)
+		return
+	
+	filearr=[]
 	for file in files:
 		a=file.decode("utf8").split(":")
 
 		if (len(a)<3):
-			print(file)
+			form.errorsq.put([str(file), None])
+			form.newmsgq.put(None)
+			return
 		else:
-			print(a[0]+" | "+prettier_size(int(a[1]))+" | "+a[2])
+			filearr.append([a[0], prettier_size(int(a[1])), a[2]])
+	form.newmsgq.put(filearr)
 
 def updatemsg():
 	global msgnumber,msgid_answer,msglist,echo
@@ -397,13 +407,13 @@ class Form(QtWidgets.QMainWindow):
 		self.newMsgTextBrowser.setParent(self)
 		self.verticalLayout.addWidget(self.newMsgTextBrowser)
 	
-	def processNewThread(self, function, takeResult=True):
+	def processNewThread(self, function, args=[], takeResult=True):
 		if self.networkingThread.isAlive():
 			return
 
 		debugform.appear()
 
-		self.networkingThread=Thread(target=function)
+		self.networkingThread=Thread(target=function, args=args)
 		self.networkingThread.daemon=True
 		self.networkingThread.start()
 
@@ -760,6 +770,7 @@ class Form(QtWidgets.QMainWindow):
 		self.additional.pushButton.clicked.connect(self.download_blacklist_txt)
 		self.additional.pushButton_2.clicked.connect(self.choose_blacklist_file)
 		self.additional.pushButton_3.clicked.connect(self.blacklist_cleanup)
+		self.additional.pushButton_4.clicked.connect(self.try_load_xfilelist)
 		self.additional.pushButton_5.clicked.connect(self.deleteAllEchoes)
 		self.additional.pushButton_6.clicked.connect(self.deleteOneEcho)
 		self.additional.pushButton_7.clicked.connect(self.copy_blacklist_txt)
@@ -969,6 +980,37 @@ class Form(QtWidgets.QMainWindow):
 
 		self.processNewThread(worker, takeResult=False)
 	
+	def try_load_xfilelist(self):
+		index=self.additional.comboBox.currentIndex()
+		server=servers[index]
+
+		result=self.processNewThread(xfile_getlist, args=[server])
+		if result == None:
+			mbox("Что-то здесь не то (сервер не поддерживает /x/file или проблемы с интернетом)")
+		else:
+			model=QtGui.QStandardItemModel(len(result), 3)
+			self.additional.tableView.setModel(model)
+			self.additional.tableView.doubleClicked.connect(self.try_load_file)
+	
+			for row in range(len(result)):
+				for col in range(3):
+					index=model.index(row, col)
+					model.setData(index, result[row][col])
+	
+			self.additional.tableView.resizeRowsToContents()
+			self.additional.tableView.resizeColumnsToContents()
+	
+	def try_load_file(self, index):
+		index=self.additional.comboBox.currentIndex()
+		server=servers[index]
+
+		model=index.model()
+		row=index.row()
+		filename=model.index(row, 0).data()
+		
+		# теперь как-то пробуем скачать файл
+		
+
 	def applyServersConfigFromButton(self):
 		curr=self.serversConfig.tabBar.currentIndex()
 		self.applyServersConfig(curr)
