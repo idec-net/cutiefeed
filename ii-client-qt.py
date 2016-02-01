@@ -13,7 +13,7 @@ import webbrowser
 from threading import Thread
 import ctypes
 import queue
-import json
+import json, shutil
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
@@ -87,17 +87,37 @@ def load_raw_file(adress):
 	
 	return form.processNewThread(loadFunction)
 
-def delete(filename, verbose=True):
-	if(not os.path.exists(filename)):
-		if (verbose):
-			print("Файл "+filename+" не существует!")
-		return
-	try:
-		print("rm "+filename)
-		os.remove(filename)
-	except:
-		if(verbose):
-			print("Ошибка удаления, проверьте права")
+def prettier_size(n,pow=0,b=1024,u='B',pre=['']+[p+'i'for p in'KMGTPEZY']):
+	r,f=min(int(math.log(max(n*b**pow,1),b)),len(pre)-1),'{:,.%if} %s%s'
+	return (f%(abs(r%(-r-1)),pre[r],u)).format(n*b**pow/b**float(r))
+
+def xt_download(server, filename, signal):
+	data = urllib.parse.urlencode({'pauth': server["authstr"], 'filename':filename}).encode('utf8')
+	out = urllib.request.urlopen(server["adress"] + 'x/file', data)
+	
+	file_size=0
+	block_size=8192
+	
+	f=open(argv[0], "wb")
+	while True:
+		buffer=out.read(block_size)
+		if not buffer:
+			break
+		file_size+=len(buffer)
+		f.write(buffer)
+	f.close()
+	print("Скачали "+str(prettier_size(file_size)))
+
+def xt_getlist(server):
+	data = urllib.parse.urlencode({'pauth': server["authstr"]}).encode('utf8')
+	files = urllib.request.urlopen(server["adress"] + 'x/file', data).read().splitlines()
+	for file in files:
+		a=file.decode("utf8").split(":")
+
+		if (len(a)<3):
+			print(file)
+		else:
+			print(a[0]+" | "+prettier_size(int(a[1]))+" | "+a[2])
 
 def updatemsg():
 	global msgnumber,msgid_answer,msglist,echo
@@ -164,8 +184,7 @@ def sendWrote(event):
 	result=form.processNewThread(sendWrote_operation)
 
 	if (not isinstance(result, Exception)):
-		form.mbox.setText("Отправлено сообщений: "+str(result))
-		form.mbox.exec_()
+		mbox("Отправлено сообщений: "+str(result))
 
 def answer(event):
 	global echo,msgid_answer
@@ -178,6 +197,10 @@ def setUIResize(filename, object):
 	currentsize=object.size()
 	uic.loadUi(filename,object)
 	object.resize(currentsize) # восстанавливаем предыдущий размер
+
+def mbox(text):
+	form.mbox.setText(text)
+	form.mbox.exec_()
 
 def editItem(event):
 	lw=event.listWidget()
@@ -391,8 +414,7 @@ class Form(QtWidgets.QMainWindow):
 		
 		while (not self.errorsq.empty()):
 			error=self.errorsq.get()
-			self.mbox.setText(error[0]+'\n\n'+str(error[1]))
-			self.mbox.exec_()
+			mbox(error[0]+'\n\n'+str(error[1]))
 
 		self.networkingThread.join()
 		
@@ -530,8 +552,7 @@ class Form(QtWidgets.QMainWindow):
 		
 		while (not self.errorsq.empty()):
 			error=self.errorsq.get()
-			self.mbox.setText(error[0]+'\n\n'+str(error[1]))
-			self.mbox.exec_()
+			mbox(error[0]+'\n\n'+str(error[1]))
 
 		self.networkingThread.join()
 		self.updateTB.join()
@@ -540,8 +561,7 @@ class Form(QtWidgets.QMainWindow):
 		
 		if not self.gotMsgs:
 			self.newMsgTextBrowser.destroy()
-			self.mbox.setText('Новых сообщений нет.')
-			self.mbox.exec_()
+			mbox('Новых сообщений нет.')
 	
 	def deleteTosses(self):
 		answer=self.clearMessages.exec_()
@@ -559,9 +579,9 @@ class Form(QtWidgets.QMainWindow):
 						delete(os.path.join(paths.tossesdir, filename))
 			
 			if counter>0:
-				self.mbox.setText("Удалено сообщений: "+str(counter))
+				mbox("Удалено сообщений: "+str(counter))
 			else:
-				self.mbox.setText("Удалять нечего")
+				mbox("Удалять нечего")
 			self.mbox.exec_()
 
 	def deleteXC(self):
@@ -575,10 +595,9 @@ class Form(QtWidgets.QMainWindow):
 					delete(os.path.join(paths.datadir, filename))
 			
 			if counter>0:
-				self.mbox.setText("Удалено файлов: "+str(counter))
+				mbox("Удалено файлов: "+str(counter))
 			else:
-				self.mbox.setText("Удалять нечего")
-			self.mbox.exec_()
+				mbox("Удалять нечего")
 
 	def deleteCache(self):
 		answer=self.clearCache.exec_()
@@ -597,10 +616,9 @@ class Form(QtWidgets.QMainWindow):
 				counter+=1
 			
 			if counter>0:
-				self.mbox.setText("Удалено файлов: "+str(counter))
+				mbox("Удалено файлов: "+str(counter))
 			else:
-				self.mbox.setText("Удалять нечего")
-			self.mbox.exec_()
+				mbox("Удалять нечего")
 
 	def deleteOneEcho(self):
 		echoarea=self.additional.comboBox_2.currentText()
@@ -737,8 +755,14 @@ class Form(QtWidgets.QMainWindow):
 	
 	def setupAdditional(self):
 		self.additional=uic.loadUi("qtgui-files/additional.ui")
+		self.additional.filename=""
+
+		self.additional.pushButton.clicked.connect(self.download_blacklist_txt)
+		self.additional.pushButton_2.clicked.connect(self.choose_blacklist_file)
+		self.additional.pushButton_3.clicked.connect(self.blacklist_cleanup)
 		self.additional.pushButton_5.clicked.connect(self.deleteAllEchoes)
 		self.additional.pushButton_6.clicked.connect(self.deleteOneEcho)
+		self.additional.pushButton_7.clicked.connect(self.copy_blacklist_txt)
 		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
@@ -773,8 +797,12 @@ class Form(QtWidgets.QMainWindow):
 	
 	def loadInfo_additional(self):
 		self.additional.comboBox.clear()
+		self.additional.comboBox_3.clear()
+
 		for server in servers:
 			self.additional.comboBox.addItem(server["adress"])
+			self.additional.comboBox_3.addItem(server["adress"])
+
 		self.additional_update_echoes()
 	
 	def loadEchoList(self, index=0):
@@ -909,6 +937,38 @@ class Form(QtWidgets.QMainWindow):
 
 		list_dialog.destroy()
 
+	def download_blacklist_txt(self):
+		server=self.additional.comboBox_3.currentText()
+		raw_blacklist=load_raw_file(server+"blacklist.txt")
+		if (raw_blacklist != None and raw_blacklist != ""):
+			f=open(paths.blacklistfile, "w")
+			f.write(raw_blacklist)
+			f.close()
+			blacklist_func.blacklist=blacklist_func.getBlackList()
+			mbox("Чёрный список загружен")
+		else:
+			mbox("Ошибка загрузки")
+
+	def choose_blacklist_file(self):
+		filename=QtWidgets.QFileDialog.getOpenFileName(self, "Выбрать файл ЧС", paths.homedir, filter="Текстовые файлы (*.txt)")[0]
+		self.additional.filename=filename
+	
+	def copy_blacklist_txt(self):
+		if self.additional.filename == "":
+			mbox("Файл не выбран!")
+		else:
+			print("Выбрали "+self.additional.filename)
+			shutil.copy(self.additional.filename, paths.blacklistfile)
+			blacklist_func.blacklist=blacklist_func.getBlackList()
+			mbox("ЧС скопирован, можно чистить")
+	
+	def blacklist_cleanup(self):
+		def worker():
+			echolist=os.listdir(paths.indexdir)
+			blacklist_func.blacklistCleanup(echolist)
+
+		self.processNewThread(worker, takeResult=False)
+	
 	def applyServersConfigFromButton(self):
 		curr=self.serversConfig.tabBar.currentIndex()
 		self.applyServersConfig(curr)
@@ -922,10 +982,9 @@ class Form(QtWidgets.QMainWindow):
 		result=saveConfig()
 		if result:
 			if not config["autoSaveChanges"]: # чтобы не надоедало людям
-				self.mbox.setText("Настройки сохранены")
+				mbox("Настройки сохранены")
 		else:
-			self.mbox.setText("Упс, сохранить не получилось, смотри в логи.")
-		return self.mbox.exec_()
+			mbox("Упс, сохранить не получилось, смотри в логи.")
 	
 	def saveOrNot(self): # смотрим, стоит ли автосохранение настроек
 		# если стоит, то сохраняем их
@@ -1042,10 +1101,13 @@ class debugForm(QtWidgets.QDialog):
 	def appear(self):
 		debugform.textBrowser.clear()
 		debugform.show()
+	
+	def disappear(self):
+		debugform.textBrowser.clear()
+		debugform.hide()
 
 	def closeEvent(self, event):
-		self.textBrowser.clear()
-		self.hide()
+		self.disappear()
 		event.ignore()
 
 def my_print(func): # декоратор над стандартным питоновским print'ом
@@ -1058,6 +1120,8 @@ gprintq=queue.Queue()
 print=my_print(print) # теперь print - это уже не print =)
 webfetch.print=print
 sender.print=print
+blacklist_func.print=print
+delete=blacklist_func.delete
 
 class stoppedDownloadException(Exception):
 	def __init__(self):

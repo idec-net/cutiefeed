@@ -9,9 +9,7 @@ from socks import socks_proxy_context
 
 import os, base64, subprocess, datetime, hashlib, cgi
 import paths
-
-def applyBlackList(str):
-	return str
+import blacklist_func
 
 def getMsg(msgid):
 	try:
@@ -94,7 +92,8 @@ def savemsg(hash, echo, message):
 
 def getMsgList(echo):
 	if(os.path.exists(paths.indexdir+echo)):
-		return open(paths.indexdir+echo).read().splitlines()
+		arr=open(paths.indexdir+echo).read().splitlines()
+		return blacklist_func.applyBlacklist(arr)
 	else:
 		return []
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
-    <height>226</height>
+    <width>480</width>
+    <height>295</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,6 +25,16 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>По-умолчанию чёрный список сообщений хранится в файле blacklist.txt в рабочем каталоге клиента. Его можно скачать с какой-нибудь станции.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QFrame" name="gridFrame">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="leftMargin">
@@ -41,13 +51,22 @@
           </property>
           <item>
            <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>Скачать ЧС</string>
+             <string>Скачать с ноды</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QComboBox" name="comboBox_3"/>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton">
@@ -86,7 +105,7 @@
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>или</string>
+             <string>или скопировать из файла:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -105,7 +124,21 @@
              <string>Выбрать файл</string>
             </property>
             <property name="icon">
-             <iconset theme="document-open"/>
+             <iconset theme="document-open">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_7">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>GO</string>
             </property>
            </widget>
           </item>
@@ -207,7 +240,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="listWidget"/>
+        <widget class="QTableView" name="tableView"/>
        </item>
       </layout>
      </widget>
@@ -216,6 +249,22 @@
        <string>Чистка базы</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Когда клиент отписывается от эхоконференции в настройках, это совсем не означает, что эха удалена из базы. Но если вам хочется сэкономить место на диске, то вот, получайте:</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QFrame" name="frame_4">
          <property name="frameShape">
@@ -299,7 +348,8 @@
              <string>Удалить все эхи</string>
             </property>
             <property name="icon">
-             <iconset theme="remove"/>
+             <iconset theme="remove">
+              <normaloff>.</normaloff>.</iconset>
             </property>
            </widget>
           </item>

@@ -81,7 +81,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 	else:
 		echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch), proxy)
 	
-	remoteEchos2d=parseFullEchoList(applyBlackList(echoBundle))
+	remoteEchos2d=parseFullEchoList(echoBundle)
 	savedMessages=[]
 	
 	for echo in echoesToFetch:
@@ -90,6 +90,8 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 		remoteMessages=remoteEchos2d[echo]
 
 		difference=[i for i in remoteMessages if i not in localMessages]
+		difference=blacklist_func.applyBlacklist(difference)
+
 		difference2d=[difference[i:i+one_request_limit] for i in range(0, len(difference), one_request_limit)]
 		
 		for diff in difference2d:
