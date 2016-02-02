@@ -5,6 +5,7 @@ locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 from getcfg import *
 from ii_functions import *
+import network
 import webfetch
 import writemsg
 import sender
@@ -14,6 +15,7 @@ from threading import Thread
 import ctypes
 import queue
 import json, shutil, math
+import urllib.parse
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
@@ -21,6 +23,12 @@ urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
 commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
+
+def getproxy():
+	proxy=None
+	if config["useProxy"]:
+		proxy={config["proxyType"]: config["proxy"]}
+	return proxy
 
 def get_pos_cache():
 	try:
@@ -73,13 +81,10 @@ def append_subj_cache(subj_data, echo):
 		print("error append cache")
 		return False
 
-def load_raw_file(adress):
+def load_raw_file(adress, data=None):
 	def loadFunction():
-		proxy=None
-		if config["useProxy"]:
-			proxy={config["proxyType"]: config["proxy"]}
 		try:
-			string=webfetch.getfile(adress, proxy)
+			string=network.getfile(adress, getproxy(), data)
 			form.newmsgq.put(string)
 		except Exception as e:
 			form.errorsq.put(["Ошибка скачивания: ", e])
@@ -91,43 +96,28 @@ def prettier_size(n,pow=0,b=1024,u='B',pre=['']+[p+'i'for p in'KMGTPEZY']):
 	r,f=min(int(math.log(max(n*b**pow,1),b)),len(pre)-1),'{:,.%if} %s%s'
 	return (f%(abs(r%(-r-1)),pre[r],u)).format(n*b**pow/b**float(r))
 
-def xfile_download(server, filename):
+def xfile_download(server, filename, savename, signal):
 	data = urllib.parse.urlencode({'pauth': server["authstr"], 'filename':filename}).encode('utf8')
-	out = urllib.request.urlopen(server["adress"] + 'x/file', data)
+	try:
+		out = network.getfile(server["adress"] + 'x/file', getproxy(), data, return_descriptor=True)
+	except Exception as e:
+		form.errorsq.put(["Ошибка скачивания: ", e])
+		form.newmsgq.put("Ну не получилось, чего поделаешь!")
+		return
 	
 	file_size=0
 	block_size=8192
 	
-	f=open(argv[0], "wb")
+	f=open(savename, "wb")
 	while True:
 		buffer=out.read(block_size)
 		if not buffer:
 			break
 		file_size+=len(buffer)
 		f.write(buffer)
+		signal.emit(file_size)
 	f.close()
-	mbox("Скачали "+str(prettier_size(file_size)))
-
-def xfile_getlist(server):
-	data = urllib.parse.urlencode({'pauth': server["authstr"]}).encode('utf8')
-	try:
-		files = urllib.request.urlopen(server["adress"] + 'x/file', data).read().splitlines()
-	except Exception as e:
-		form.errorsq.put(["Ошибка скачивания: ", e])
-		form.newmsgq.put(None)
-		return
-	
-	filearr=[]
-	for file in files:
-		a=file.decode("utf8").split(":")
-
-		if (len(a)<3):
-			form.errorsq.put([str(file), None])
-			form.newmsgq.put(None)
-			return
-		else:
-			filearr.append([a[0], prettier_size(int(a[1])), a[2]])
-	form.newmsgq.put(filearr)
+	form.newmsgq.put("Скачали "+str(prettier_size(file_size)))
 
 def updatemsg():
 	global msgnumber,msgid_answer,msglist,echo
@@ -177,12 +167,8 @@ def c_writeNew(event):
 def sendWrote_operation():
 	countsent=0
 
-	proxy=None
-	if config["useProxy"]:
-		proxy={config["proxyType"]: config["proxy"]}
-
 	try:
-		countsent=sender.sendMessages(proxy)
+		countsent=sender.sendMessages(getproxy())
 	except stoppedDownloadException as e:
 		form.newmsgq.put(e)
 	except Exception as e:
@@ -294,6 +280,7 @@ def openLink(link):
 
 class Form(QtWidgets.QMainWindow):
 	updateSignal=QtCore.pyqtSignal(str, name="update_signal")
+	dl_label_signal=QtCore.pyqtSignal(int, name="dl_label_signal")
 
 	def __init__(self):
 		global msglist,msgnumber,listlen
@@ -488,6 +475,7 @@ class Form(QtWidgets.QMainWindow):
 			if len(msgids) > 0:
 				self.newmsgq.put(msgids)
 
+		proxy_config=getproxy()
 		for server in servers:
 			try:
 				if (server["advancedue"] == False):
@@ -497,11 +485,7 @@ class Form(QtWidgets.QMainWindow):
 					# uelimit - сколько msgid скачивать максимум при наличии расширенной схемы
 					# если стоит в False, то скачиваем все
 
-				proxy=None
-				if config["useProxy"]:
-					proxy={config["proxyType"]: config["proxy"]}
-
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, proxy=proxy, callback=fx)
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, proxy=proxy_config, callback=fx)
 			except stoppedDownloadException:
 				break
 			except Exception as e:
@@ -592,7 +576,6 @@ class Form(QtWidgets.QMainWindow):
 				mbox("Удалено сообщений: "+str(counter))
 			else:
 				mbox("Удалять нечего")
-			self.mbox.exec_()
 
 	def deleteXC(self):
 		answer=self.clearXC.exec_()
@@ -774,6 +757,8 @@ class Form(QtWidgets.QMainWindow):
 		self.additional.pushButton_5.clicked.connect(self.deleteAllEchoes)
 		self.additional.pushButton_6.clicked.connect(self.deleteOneEcho)
 		self.additional.pushButton_7.clicked.connect(self.copy_blacklist_txt)
+		self.dl_label_signal.connect(self.dl_set_label, QtCore.Qt.QueuedConnection)
+		self.additional.tableView.doubleClicked.connect(self.try_load_file)
 		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
@@ -961,7 +946,7 @@ class Form(QtWidgets.QMainWindow):
 			mbox("Ошибка загрузки")
 
 	def choose_blacklist_file(self):
-		filename=QtWidgets.QFileDialog.getOpenFileName(self, "Выбрать файл ЧС", paths.homedir, filter="Текстовые файлы (*.txt)")[0]
+		filename=QtWidgets.QFileDialog.getOpenFileName(self.additional, "Выбрать файл ЧС", paths.homedir, filter="Текстовые файлы (*.txt)")[0]
 		self.additional.filename=filename
 	
 	def copy_blacklist_txt(self):
@@ -984,32 +969,67 @@ class Form(QtWidgets.QMainWindow):
 		index=self.additional.comboBox.currentIndex()
 		server=servers[index]
 
-		result=self.processNewThread(xfile_getlist, args=[server])
-		if result == None:
+		data = urllib.parse.urlencode({'pauth': server["authstr"]}).encode('utf8')
+
+		result=load_raw_file(server["adress"] + 'x/file', data)
+		if result == "" or result == None:
 			mbox("Что-то здесь не то (сервер не поддерживает /x/file или проблемы с интернетом)")
 		else:
-			model=QtGui.QStandardItemModel(len(result), 3)
+			filearr=[]
+
+			files=result.splitlines()
+			for file in files:
+				a=file.split(":")
+
+				if (len(a)<3):
+					mbox(file)
+					return
+				else:
+					filearr.append([a[0], prettier_size(int(a[1])), a[2]])
+			model=QtGui.QStandardItemModel(len(filearr), 3)
 			self.additional.tableView.setModel(model)
-			self.additional.tableView.doubleClicked.connect(self.try_load_file)
 	
-			for row in range(len(result)):
+			for row in range(len(filearr)):
 				for col in range(3):
 					index=model.index(row, col)
-					model.setData(index, result[row][col])
+					model.setData(index, filearr[row][col])
 	
 			self.additional.tableView.resizeRowsToContents()
 			self.additional.tableView.resizeColumnsToContents()
 	
 	def try_load_file(self, index):
-		index=self.additional.comboBox.currentIndex()
-		server=servers[index]
+		i=self.additional.comboBox.currentIndex()
+		server=servers[i]
 
 		model=index.model()
 		row=index.row()
 		filename=model.index(row, 0).data()
+		expectSize=model.index(row, 1).data()
 		
+		savename=QtWidgets.QFileDialog.getSaveFileName(self.additional, "Куда сохраняем", paths.homedir+"/"+filename)[0]
+		if savename=="":
+			return
+
 		# теперь как-то пробуем скачать файл
-		
+
+		self.additional.label_7.setText("")
+		self.additional.count=0
+		self.additional.total=" из "+expectSize;
+
+		timer=QtCore.QTimer(self.additional)
+		timer.timeout.connect(self.dl_update_label)
+		timer.start(1000)
+		result=self.processNewThread(xfile_download, args=[server, filename, savename, self.dl_label_signal])
+		mbox(result)
+		timer.stop()
+
+	def dl_set_label(self, size):
+		self.additional.count=size
+
+	def dl_update_label(self):
+		text=prettier_size(self.additional.count)+self.additional.total
+		self.additional.label_7.setText(text)
+		print(text)
 
 	def applyServersConfigFromButton(self):
 		curr=self.serversConfig.tabBar.currentIndex()
@@ -1141,8 +1161,8 @@ class debugForm(QtWidgets.QDialog):
 		debugform.textBrowser.append(text)
 	
 	def appear(self):
-		debugform.textBrowser.clear()
 		debugform.show()
+		debugform.textBrowser.clear()
 	
 	def disappear(self):
 		debugform.textBrowser.clear()
@@ -1161,6 +1181,7 @@ def my_print(func): # декоратор над стандартным пито�
 gprintq=queue.Queue()
 print=my_print(print) # теперь print - это уже не print =)
 webfetch.print=print
+network.print=print
 sender.print=print
 blacklist_func.print=print
 delete=blacklist_func.delete

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>295</height>
+    <width>494</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -189,6 +189,13 @@
        <string>Файлы ноды</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Подробнее про расширение /x/file написано в документации.</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QFrame" name="frame_3">
          <property name="frameShape">

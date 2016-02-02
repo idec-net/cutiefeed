@@ -1,28 +1,8 @@
 #!/usr/bin/env python3
 
 from ii_functions import *
+import network
 import paths
-
-def getfile(file, proxy=None, quiet=False):
-	if (not quiet):
-		print("fetch "+file)
-	
-	if proxy == None:
-		if (urllib.request._opener != None):
-			urllib.request.install_opener(None)
-	elif (proxy != None and "http" in proxy.keys()):
-		handler=urllib.request.ProxyHandler(proxy)
-		opener=urllib.request.build_opener(handler)
-		urllib.request.install_opener(opener)
-	elif ("socks" in proxy.keys()):
-		keys=proxy["socks"].split(":")
-		url=keys[0]
-		port=int(keys[1])
-		
-		with socks_proxy_context.socks_proxy_context(proxy_address=(url, port)):
-			return urllib.request.urlopen(file, timeout=20.0).read().decode("utf8")
-	
-	return urllib.request.urlopen(file).read().decode("utf8")
 
 def parseFullEchoList(echobundle):
 	echos2d={}
@@ -51,7 +31,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 			open(xcfile, "w").write("\n".join([x+":0" for x in firstEchoesToFetch]))
 			f=False
 		if(f):
-			remotexcget=getfile(adress+"x/c/"+"/".join(firstEchoesToFetch), proxy)
+			remotexcget=network.getfile(adress+"x/c/"+"/".join(firstEchoesToFetch), proxy)
 			remotexc=[x.split(":") for x in remotexcget.splitlines()]
 			
 			if(len(f)==len(remotexc)):
@@ -77,9 +57,9 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 		return []
 	
 	if (fetch_limit != False):
-		echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(fetch_limit)+":"+str(fetch_limit), proxy)
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(fetch_limit)+":"+str(fetch_limit), proxy)
 	else:
-		echoBundle=getfile(adress+"u/e/"+"/".join(echoesToFetch), proxy)
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch), proxy)
 	
 	remoteEchos2d=parseFullEchoList(echoBundle)
 	savedMessages=[]
@@ -97,7 +77,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 		for diff in difference2d:
 			print(echo)
 			impldifference="/".join(diff)
-			fullbundle=getfile(adress+"u/m/"+impldifference, proxy)
+			fullbundle=network.getfile(adress+"u/m/"+impldifference, proxy)
 	
 			bundles=fullbundle.splitlines()
 			for bundle in bundles:
