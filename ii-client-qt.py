@@ -415,7 +415,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.networkingThread.join()
 		
-		debugform.close()
+		debugform.disappear()
 		
 		if takeResult:
 			return self.newmsgq.get()
@@ -551,7 +551,7 @@ class Form(QtWidgets.QMainWindow):
 		self.networkingThread.join()
 		self.updateTB.join()
 		
-		debugform.close()
+		debugform.disappear()
 		
 		if not self.gotMsgs:
 			self.newMsgTextBrowser.destroy()
@@ -1161,10 +1161,11 @@ class debugForm(QtWidgets.QDialog):
 		debugform.textBrowser.append(text)
 	
 	def appear(self):
-		debugform.show()
 		debugform.textBrowser.clear()
+		debugform.show()
 	
 	def disappear(self):
+		gprintq.queue.clear()
 		debugform.textBrowser.clear()
 		debugform.hide()
 
