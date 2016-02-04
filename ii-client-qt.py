@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import locale,sys
-locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+import sys
 
 from getcfg import *
 from ii_functions import *
@@ -56,9 +55,7 @@ def save_pos_cache(cache):
 def get_subj_cache(echo):
 	filename=os.path.join(paths.subjcachedir, echo)
 	try:
-		f=open(filename)
-		cache=f.read().splitlines()
-		f.close()
+		cache=read_file(filename).splitlines()
 		return cache
 	except:
 		touch(filename)
@@ -1054,7 +1051,7 @@ class Form(QtWidgets.QMainWindow):
 			self.saveChanges()
 
 	def setupHelp(self):
-		helpfile=open("readme.html").read()
+		helpfile=read_file("readme.html")
 		self.helpWindow=uic.loadUi("qtgui-files/readhelp.ui")
 		self.helpWindow.textBrowser.setHtml(helpfile)
 
@@ -1142,7 +1139,8 @@ class Form(QtWidgets.QMainWindow):
 			self.additional,
 			self.helpWindow,
 			self.clearXC,
-			self.clearCache
+			self.clearCache,
+			self.clearMessages
 		]:
 			obj.destroy()
 		debugform.destroy()

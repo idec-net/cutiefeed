@@ -32,8 +32,8 @@
          <string>Меню</string>
         </property>
         <property name="icon">
-         <iconset theme="document-properties">
-          <normaloff>.</normaloff>.</iconset>
+         <iconset>
+          <normaloff>../artwork/document-properties.svg</normaloff>../artwork/document-properties.svg</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -112,7 +112,8 @@
          <string>Обновить</string>
         </property>
         <property name="icon">
-         <iconset theme="view-refresh"/>
+         <iconset>
+          <normaloff>../artwork/view-refresh.svg</normaloff>../artwork/view-refresh.svg</iconset>
         </property>
        </widget>
       </item>

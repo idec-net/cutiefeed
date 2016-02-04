@@ -124,8 +124,8 @@
              <string>Выбрать файл</string>
             </property>
             <property name="icon">
-             <iconset theme="document-open">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset>
+              <normaloff>../artwork/fileopen.svg</normaloff>../artwork/fileopen.svg</iconset>
             </property>
            </widget>
           </item>
@@ -176,6 +176,10 @@
             </property>
             <property name="text">
              <string>Очистить &quot;плохие&quot; сообщения</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../artwork/edit-clear.svg</normaloff>../artwork/edit-clear.svg</iconset>
             </property>
            </widget>
           </item>
@@ -368,8 +372,8 @@
              <string>Удалить все эхи</string>
             </property>
             <property name="icon">
-             <iconset theme="remove">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset>
+              <normaloff>../artwork/gtk-delete.svg</normaloff>../artwork/gtk-delete.svg</iconset>
             </property>
            </widget>
           </item>

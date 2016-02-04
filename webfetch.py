@@ -25,7 +25,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 		xcfile=paths.datadir+"base-"+hsh(adress)
 		donot=[]
 		try:
-			f=open(xcfile).read().splitlines()
+			f=read_file(xcfile).splitlines()
 		except:
 			touch(xcfile)
 			open(xcfile, "w").write("\n".join([x+":0" for x in firstEchoesToFetch]))

@@ -4,9 +4,6 @@ from tkinter import *
 from tkinter.ttk import *
 import tkinter.messagebox
 
-import locale
-locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
-
 from getcfg import *
 from ii_functions import *
 import webfetch

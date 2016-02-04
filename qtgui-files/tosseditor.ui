@@ -29,9 +29,6 @@
          <item row="1" column="1">
           <widget class="QLineEdit" name="lineEdit"/>
          </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="lineEdit_2"/>
-         </item>
          <item row="4" column="1">
           <widget class="QLineEdit" name="lineEdit_3"/>
          </item>
@@ -66,6 +63,9 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="lineEdit_2"/>
+         </item>
         </layout>
        </item>
        <item>
@@ -93,8 +93,8 @@
         <string>Сохранить</string>
        </property>
        <property name="icon">
-        <iconset theme="document-save">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset>
+         <normaloff>../artwork/document-save.svg</normaloff>../artwork/document-save.svg</iconset>
        </property>
       </widget>
      </item>
@@ -104,8 +104,8 @@
         <string>Закрыть и удалить</string>
        </property>
        <property name="icon">
-        <iconset theme="edit-delete">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset>
+         <normaloff>../artwork/edit-clear.svg</normaloff>../artwork/edit-clear.svg</iconset>
        </property>
       </widget>
      </item>
@@ -118,8 +118,8 @@
         <string>Закрыть</string>
        </property>
        <property name="icon">
-        <iconset theme="window-close">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset>
+         <normaloff>../artwork/dialog-close.svg</normaloff>../artwork/dialog-close.svg</iconset>
        </property>
       </widget>
      </item>

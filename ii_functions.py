@@ -4,9 +4,13 @@ import os, base64, subprocess, datetime, hashlib, cgi
 import paths
 import blacklist_func
 
+def read_file(filename):
+	with open(filename, "rb") as p:
+		return p.read().decode("utf8")
+
 def getMsg(msgid):
 	try:
-		msg=open(paths.msgdir+msgid).read().splitlines()
+		msg=read_file(paths.msgdir+msgid).splitlines()
 		tags=parseTags(msg[0])
 		if('repto' in tags):
 			rpt=tags['repto']
@@ -33,7 +37,7 @@ def getMsgEscape(msgid): # получаем сообщение и режем htm
 
 def getOutMsg(name):
 	try:
-		source=open(paths.tossesdir+name).read().splitlines()
+		source=read_file(paths.tossesdir+name).splitlines()
 		
 		str=source[4]
 		if str.startswith("@repto:"):
@@ -85,7 +89,7 @@ def savemsg(hash, echo, message):
 
 def getMsgList(echo):
 	if(os.path.exists(paths.indexdir+echo)):
-		arr=open(paths.indexdir+echo).read().splitlines()
+		arr=read_file(paths.indexdir+echo).splitlines()
 		return blacklist_func.applyBlacklist(arr)
 	else:
 		return []

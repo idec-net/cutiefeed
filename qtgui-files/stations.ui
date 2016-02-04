@@ -31,8 +31,8 @@
         <string>Новая станция</string>
        </property>
        <property name="icon">
-        <iconset theme="tab-new">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset>
+         <normaloff>../artwork/filenew.svg</normaloff>../artwork/filenew.svg</iconset>
        </property>
       </widget>
      </item>
@@ -48,8 +48,8 @@
         <string>Удалить станцию</string>
        </property>
        <property name="icon">
-        <iconset theme="edit-delete">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset>
+         <normaloff>../artwork/remove.svg</normaloff>../artwork/remove.svg</iconset>
        </property>
       </widget>
      </item>

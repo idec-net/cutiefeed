@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 
-import locale,sys
-locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
-
 import sys,os
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets, uic
 
 class EditorForm(QtWidgets.QWidget):
 	def __init__(self, filename):
@@ -18,7 +15,7 @@ class EditorForm(QtWidgets.QWidget):
 		self.filename=filename
 
 		try:
-			source=open(self.filename, "r").read()
+			source=open(self.filename, "rb").read().decode("utf8")
 			self.plainTextEdit.setPlainText(source)
 			self.tabChanged(0)
 		except:

@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>497</width>
-    <height>405</height>
+    <height>438</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,12 +53,6 @@
    </item>
    <item>
     <widget class="QFrame" name="frame_4">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="leftMargin">
        <number>0</number>

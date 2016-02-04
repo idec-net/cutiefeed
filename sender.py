@@ -13,7 +13,7 @@ def sendMessages(proxy=None):
 	
 	countsent=0
 	for file in files:
-		f=open(paths.tossesdir+file+".toss").read()
+		f=read_file(paths.tossesdir+file+".toss")
 		
 		adress=servers[0]["adress"]
 		authstr=servers[0]["authstr"]
