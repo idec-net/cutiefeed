@@ -108,8 +108,8 @@ class EditorForm(QtWidgets.QWidget):
 		string=self.plainTextEdit.toPlainText()
 
 		try:
-			f=open(self.filename, "w")
-			f.write(string)
+			f=open(self.filename, "wb")
+			f.write(string.encode("utf8"))
 			f.close()
 		except:
 			self.mbox.setText("Файл "+self.filename+" сохранить не удалось =(")

@@ -12,3 +12,4 @@ iicli-modular
 ==============
 
 lib-socks-proxy: https://github.com/polymorphm/lib-socks-proxy
+Значки из проекта Clarity: https://github.com/jcubic/Clarity

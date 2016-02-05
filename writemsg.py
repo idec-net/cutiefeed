@@ -23,7 +23,7 @@ def edit(message):
 	global lasttoss
 	fname=paths.tossesdir+str(lasttoss)+".toss"
 	touch(fname)
-	open(fname, "w").write(message)
+	open(fname, "wb").write(message.encode("utf8"))
 	openEditor(fname)
 	lasttoss+=1
 
