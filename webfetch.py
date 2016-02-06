@@ -2,7 +2,7 @@
 
 from ii_functions import *
 import network
-import paths
+import os, paths
 
 def parseFullEchoList(echobundle):
 	echos2d={}
@@ -22,7 +22,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 	if(len(firstEchoesToFetch)==0):
 		return []
 	if(xcenable):
-		xcfile=paths.datadir+"base-"+hsh(adress)
+		xcfile=os.path.join(paths.datadir, "base-"+hsh(adress))
 		donot=[]
 		try:
 			f=read_file(xcfile).splitlines()

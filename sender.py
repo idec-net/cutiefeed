@@ -13,7 +13,7 @@ def sendMessages(proxy=None):
 	
 	countsent=0
 	for file in files:
-		f=read_file(paths.tossesdir+file+".toss")
+		f=read_file(os.path.join(paths.tossesdir, file+".toss"))
 		
 		adress=servers[0]["adress"]
 		authstr=servers[0]["authstr"]
@@ -34,5 +34,8 @@ def sendMessages(proxy=None):
 		
 		if out.startswith('msg ok'):
 			countsent+=1
-			os.rename(paths.tossesdir+file+".toss", paths.tossesdir+file+".out")
+			one=os.path.join(paths.tossesdir, file+".toss")
+			two=os.path.join(paths.tossesdir, file+".out")
+
+			os.rename(one, two)
 	return countsent

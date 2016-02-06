@@ -3,8 +3,10 @@
 from ii_functions import *
 from getcfg import *
 import paths
+import shlex
 
-tosses=[int(i.strip(".toss").strip(".out")) for i in os.listdir(paths.tossesdir)]
+tossdir_files=[i for i in os.listdir(paths.tossesdir) if i.endswith(".out") or i.endswith(".toss")]
+tosses=[int(i.strip(".toss").strip(".out")) for i in tossdir_files]
 tosses.sort()
 
 if(len(tosses)==0):
@@ -17,11 +19,11 @@ def openEditor(file):
 	else:
 		editor=config["editor"]
 	
-	p=subprocess.Popen(editor+" "+file, shell=True)
+	p=subprocess.Popen(editor+" "+shlex.quote(file), shell=True)
 
 def edit(message):
 	global lasttoss
-	fname=paths.tossesdir+str(lasttoss)+".toss"
+	fname=os.path.join(paths.tossesdir, str(lasttoss)+".toss")
 	touch(fname)
 	open(fname, "wb").write(message.encode("utf8"))
 	openEditor(fname)
