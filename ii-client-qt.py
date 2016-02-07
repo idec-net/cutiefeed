@@ -427,7 +427,7 @@ class Form(QtWidgets.QMainWindow):
 		if len(subjes) != listlen:
 			cache=open(os.path.join(paths.subjcachedir, echo), "w")
 			for i in range(listlen):
-				subj=getMsgEscape(msglist[i]).get('subj')
+				subj=getMsg(msglist[i]).get('subj')
 				self.loadviewq.put_nowait([i,subj])
 				cache.write(subj+"\n")
 			cache.close()

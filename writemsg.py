@@ -3,7 +3,6 @@
 from ii_functions import *
 from getcfg import *
 import paths
-import shlex
 
 tossdir_files=[i for i in os.listdir(paths.tossesdir) if i.endswith(".out") or i.endswith(".toss")]
 tosses=[int(i.strip(".toss").strip(".out")) for i in tossdir_files]
@@ -19,7 +18,7 @@ def openEditor(file):
 	else:
 		editor=config["editor"]
 	
-	p=subprocess.Popen(editor+" "+shlex.quote(file), shell=True)
+	p=subprocess.Popen(editor+" \""+file+"\"", shell=True)
 
 def edit(message):
 	global lasttoss
