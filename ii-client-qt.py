@@ -164,8 +164,12 @@ def c_writeNew(event):
 def sendWrote_operation():
 	countsent=0
 
+	def errorCb(tossfile, error):
+		form.errorsq.put(["Ошибка ноды при отправке "+tossfile+".toss: ", error])
+		# эта функция вызывается, если происходит ошибка на ноде
+
 	try:
-		countsent=sender.sendMessages(getproxy())
+		countsent=sender.sendMessages(getproxy(), errorCb)
 	except stoppedDownloadException as e:
 		form.newmsgq.put(e)
 	except Exception as e:
@@ -317,10 +321,12 @@ class Form(QtWidgets.QMainWindow):
 		# если запускаем клиент в первый раз, сначала показываются настройки
 		if (config["firstrun"]==True):
 			config["firstrun"]=False
+			global form
+			form=self # костыль, иначе запрос списка эх не заработает
 			self.execServersConfig()
 			if not config["autoSaveChanges"]:
 				self.saveChanges()
-		
+
 		self.mainwindow()
 
 	def mainwindow(self):
@@ -818,7 +824,7 @@ class Form(QtWidgets.QMainWindow):
 				if (repto!="-"):
 					repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
 	
-				output+="<a href='#out:"+msg+"'>"+msg+"</a><br />Ответ на: "+repto+"<br />"+s.get("echo")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))+"<br /><br />"
+				output+="<a href='#out:"+msg+"'>"+msg+"</a><br />Ответ на: "+repto+"<br />"+s.get("echo")+"<br />"+s.get("subj")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))+"<br /><br />"
 		except Exception as e:
 			self.newmsgq.put(e)
 			self.errorsq.put(["Ошибка: ", e])
@@ -1191,8 +1197,8 @@ class stoppedDownloadException(Exception):
 
 app = QtWidgets.QApplication(sys.argv)
 
-form=Form()
 debugform=debugForm()
+form=Form()
 
 form.show()
 sys.exit(app.exec_())

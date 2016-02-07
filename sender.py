@@ -6,7 +6,7 @@ import network
 import urllib.parse
 import paths
 
-def sendMessages(proxy=None):
+def sendMessages(proxy=None, error_callback=None):
 	files=os.listdir(paths.tossesdir)
 	files=[x[:-5] for x in files if x.endswith(".toss")]
 	files.sort()
@@ -38,4 +38,7 @@ def sendMessages(proxy=None):
 			two=os.path.join(paths.tossesdir, file+".out")
 
 			os.rename(one, two)
+		else:
+			if (error_callback != None):
+				error_callback(file, out)
 	return countsent
