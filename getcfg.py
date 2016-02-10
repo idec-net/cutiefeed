@@ -30,7 +30,8 @@ defaultValues={
 	"firstrun": True,
 	"autoSaveChanges": True,
 	"useProxy": False,
-	"rememberEchoPosition": True
+	"rememberEchoPosition": True,
+	"oneRequestLimit": 20
 }
 
 defaultServersValues={
@@ -39,6 +40,7 @@ defaultServersValues={
 	"echoareas": ["ii.test.14", "mlp.15"],
 	"xcenable": True,
 	"advancedue": False,
+	"pervasiveue": False,
 	"uelimit": 200
 }
 

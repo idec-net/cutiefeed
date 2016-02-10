@@ -18,7 +18,7 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, from_msgid=False, proxy=None, callback=None):
+def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, from_msgid=False, proxy=None, pervasive_ue=False, callback=None):
 	if(len(firstEchoesToFetch)==0):
 		return []
 	if(xcenable):
@@ -57,39 +57,85 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 		return []
 	
 	if (fetch_limit != False):
-		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(fetch_limit)+":"+str(fetch_limit), proxy)
+		bottomOffset=fetch_limit
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(bottomOffset)+":"+str(fetch_limit), proxy)
 	else:
 		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch), proxy)
-	
+
+	localIndex={}
+
+	for echo in echoesToFetch:
+		print("loading local echo "+echo)
+		localIndex[echo]=getMsgList(echo)
+
 	remoteEchos2d=parseFullEchoList(echoBundle)
+	
+	commondiff={} # это все новые сообщения, которые надо будет скачать
+
+	nextfetch=[]
+	for echo in echoesToFetch:
+		localMessages=localIndex[echo]
+		remoteMessages=remoteEchos2d[echo]
+		commondiff[echo]=[i for i in remoteMessages if i not in localMessages]
+
+		if pervasive_ue==True and len(remoteMessages) == len(commondiff[echo]):
+			nextfetch.append(echo)
+	
+	# и вот начинается магия
+	while (len(nextfetch) > 0):
+		bottomOffset+=fetch_limit
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(nextfetch)+"/-"+str(bottomOffset)+":"+str(fetch_limit), proxy)
+		msgsDict=parseFullEchoList(echoBundle)
+
+		for echo in nextfetch:
+			localMessages=localIndex[echo]
+			remoteMessages=msgsDict.get(echo)
+	
+			if remoteMessages == None:
+				nextfetch.remove(echo)
+				continue
+			
+			# добавляем нужные элементы в начало
+			diff=[i for i in remoteMessages if i not in localMessages and i not in commondiff[echo]]
+			commondiff[echo]=diff + commondiff[echo]
+			# если мы всё, то удаляем эху из списка получения
+			if len(remoteMessages) != len(diff):
+				nextfetch.remove(echo)
+
+	print("making assoc dict: msgid -> echo")
+
+	echodict={}
+	for echo, echolist in commondiff.items():
+		for msgid in echolist:
+			echodict[msgid]=echo
+
+	difference=[] # делаем так, чтобы расставить сообщения в нужном порядке
+	for echo in commondiff.keys():
+		difference+=[msgid for msgid in commondiff[echo]]
+	
+	print("apply blacklist to remote echoareas")
+
+	difference=blacklist_func.applyBlacklist(difference)
+	difference2d=[difference[i:i+one_request_limit] for i in range(0, len(difference), one_request_limit)]
+
 	savedMessages=[]
 	
-	for echo in echoesToFetch:
-		localMessages=getMsgList(echo)
-		
-		remoteMessages=remoteEchos2d[echo]
+	for diff in difference2d:
+		impldifference="/".join(diff)
+		fullbundle=network.getfile(adress+"u/m/"+impldifference, proxy)
 
-		difference=[i for i in remoteMessages if i not in localMessages]
-		difference=blacklist_func.applyBlacklist(difference)
-
-		difference2d=[difference[i:i+one_request_limit] for i in range(0, len(difference), one_request_limit)]
-		
-		for diff in difference2d:
-			print(echo)
-			impldifference="/".join(diff)
-			fullbundle=network.getfile(adress+"u/m/"+impldifference, proxy)
-	
-			bundles=fullbundle.splitlines()
-			for bundle in bundles:
-				arr=bundle.split(":")
-				bundleMsgids=[]
-				if(arr[0]!="" and arr[1]!=""):
-					msgid=arr[0]; message=b64d(arr[1])
-					print("savemsg "+msgid)
-					savedMessages.append(msgid)
-					bundleMsgids.append(msgid)
-					savemsg(msgid, echo, message)
-				if callback != None:
-					callback(bundleMsgids)
-					
+		bundles=fullbundle.splitlines()
+		for bundle in bundles:
+			arr=bundle.split(":")
+			bundleMsgids=[]
+			if(arr[0]!="" and arr[1]!=""):
+				msgid=arr[0]; message=b64d(arr[1])
+				echo=echodict[msgid]
+				print("savemsg "+msgid+" to "+echo)
+				savedMessages.append(msgid)
+				bundleMsgids.append(msgid)
+				savemsg(msgid, echo, message)
+			if callback != None:
+				callback(bundleMsgids)
+				
 	return savedMessages

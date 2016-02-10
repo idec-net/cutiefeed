@@ -488,7 +488,7 @@ class Form(QtWidgets.QMainWindow):
 					# uelimit - сколько msgid скачивать максимум при наличии расширенной схемы
 					# если стоит в False, то скачиваем все
 
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, proxy=proxy_config, callback=fx)
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, one_request_limit=config["oneRequestLimit"], proxy=proxy_config, pervasive_ue=server["pervasiveue"], callback=fx)
 			except stoppedDownloadException:
 				break
 			except Exception as e:
@@ -738,9 +738,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.serversConfig.addTabButton.clicked.connect(self.tabAddRequest)
 		self.serversConfig.deleteTabButton.clicked.connect(self.tabDeleteRequest)
-
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
-		self.serversConfig.checkBox_2.stateChanged.connect(self.changeSpinBox)
 	
 	def setupUnsentView(self):
 		self.unsentView=uic.loadUi("qtgui-files/unsent.ui")
@@ -762,6 +760,7 @@ class Form(QtWidgets.QMainWindow):
 		self.additional.pushButton_7.clicked.connect(self.copy_blacklist_txt)
 		self.dl_label_signal.connect(self.dl_set_label, QtCore.Qt.QueuedConnection)
 		self.additional.tableView.doubleClicked.connect(self.try_load_file)
+		self.additional.tableView.horizontalHeader().setStretchLastSection(True)
 		
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
@@ -779,6 +778,8 @@ class Form(QtWidgets.QMainWindow):
 		self.clientConfig.checkBox_4.setChecked(config["useProxy"])
 		self.clientConfig.checkBox_5.setChecked(config["rememberEchoPosition"])
 
+		self.clientConfig.spinBox.setValue(config["oneRequestLimit"])
+
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
 
@@ -792,7 +793,12 @@ class Form(QtWidgets.QMainWindow):
 
 		self.serversConfig.checkBox.setChecked(curr["xcenable"])
 		self.serversConfig.checkBox_2.setChecked(curr["advancedue"])
+		self.serversConfig.checkBox_3.setChecked(curr["pervasiveue"])
 		self.serversConfig.spinBox.setValue(curr["uelimit"])
+
+		is_ue_enabled=curr["advancedue"]
+		self.serversConfig.checkBox_3.setEnabled(is_ue_enabled)
+		self.serversConfig.spinBox.setEnabled(is_ue_enabled)
 	
 	def loadInfo_additional(self):
 		self.additional.comboBox.clear()
@@ -886,6 +892,7 @@ class Form(QtWidgets.QMainWindow):
 		config["autoSaveChanges"]=self.clientConfig.checkBox_3.isChecked()
 		config["useProxy"]=self.clientConfig.checkBox_4.isChecked()
 		config["rememberEchoPosition"]=self.clientConfig.checkBox_5.isChecked()
+		config["oneRequestLimit"]=self.clientConfig.spinBox.value()
 
 		config["offline-echoareas"]=[]
 
@@ -900,6 +907,7 @@ class Form(QtWidgets.QMainWindow):
 		servers[index]["authstr"]=self.serversConfig.lineEdit_2.text()
 		servers[index]["xcenable"]=self.serversConfig.checkBox.isChecked()
 		servers[index]["advancedue"]=self.serversConfig.checkBox_2.isChecked()
+		servers[index]["pervasiveue"]=self.serversConfig.checkBox_3.isChecked()
 		servers[index]["uelimit"]=self.serversConfig.spinBox.value()
 
 		servers[index]["echoareas"]=[]
@@ -919,6 +927,7 @@ class Form(QtWidgets.QMainWindow):
 
 		model=QtGui.QStandardItemModel(len(echoes), 3)
 		list_dialog.tableView.setModel(model)
+		list_dialog.tableView.horizontalHeader().setStretchLastSection(True)
 
 		for row in range(len(echoes)):
 			for col in range(3):
@@ -1082,12 +1091,6 @@ class Form(QtWidgets.QMainWindow):
 		servers.append(defaultServersValues)
 		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
 		self.serversConfig.tabBar.setCurrentIndex(newindex)
-	
-	def changeSpinBox(self, state):
-		if (state == 0):
-			self.serversConfig.spinBox.setReadOnly(True)
-		else:
-			self.serversConfig.spinBox.setReadOnly(False)
 	
 	def tabDeleteRequest(self):
 		currindex=self.serversConfig.tabBar.currentIndex()

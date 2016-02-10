@@ -11,6 +11,7 @@
 			],
 			"xcenable":true,
 			"advancedue":false,
+			"pervasiveue": false,
 			"uelimit":200
 		},
 		{
@@ -22,6 +23,7 @@
 			],
 			"xcenable":false,
 			"advancedue":false,
+			"pervasiveue": false,
 			"uelimit":100
 		}
 	],
@@ -36,5 +38,6 @@
 	"firstrun": true,
 	"autoSaveChanges": true,
 	"useProxy": false,
-	"rememberEchoPosition": true
+	"rememberEchoPosition": true,
+	"oneRequestLimit": 20
 }
