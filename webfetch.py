@@ -91,7 +91,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 			localMessages=localIndex[echo]
 			remoteMessages=msgsDict.get(echo)
 	
-			if remoteMessages == None:
+			if remoteMessages == None or len(remoteMessages) == 0:
 				nextfetch.remove(echo)
 				continue
 			

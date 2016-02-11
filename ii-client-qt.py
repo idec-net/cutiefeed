@@ -269,8 +269,6 @@ def openLink(link):
 				form.viewwindow(link) # переходим в эху
 			else:
 				form.openMessageView(link) # смотрим сообщение
-		elif word == "out": # открываем редактор
-			writemsg.openEditor(paths.tossesdir+link)
 		elif word == "answer": # отвечаем на msgid
 			msg=getMsg(link)
 			writemsg.answer(msg.get("echo"), link)
@@ -741,11 +739,60 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
 	
 	def setupUnsentView(self):
+		def updateView(filename):
+			if filename == "": # например, если мы удалили последнее
+				self.unsentView.textBrowser.clear()
+				return
+
+			s=getOutMsgEscape(filename)
+			repto=s.get("repto") or "-"
+			
+			if (repto!="-"):
+				repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
+
+			output="Ответ на: "+repto+"<br />"+s.get("echo")+"<br />"+s.get("subj")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))
+			self.unsentView.textBrowser.setHtml(output)
+
+		def left():
+			msgnumber=self.unsentView.listWidget.currentRow()
+			if(msgnumber>0):
+				msgnumber-=1;
+				self.unsentView.listWidget.setCurrentRow(msgnumber)
+
+		def right():
+			msgnumber=self.unsentView.listWidget.currentRow()
+			listlen=self.unsentView.listWidget.count()
+			if(msgnumber<(listlen-1)):
+				msgnumber+=1;
+				self.unsentView.listWidget.setCurrentRow(msgnumber)
+
+		def edit():
+			item=self.unsentView.listWidget.currentItem()
+			if item != None:
+				filename=item.text()
+				writemsg.openEditor(paths.tossesdir+filename)
+
+		def deleteFile():
+			msgnumber=self.unsentView.listWidget.currentRow()
+			item=self.unsentView.listWidget.takeItem(msgnumber)
+			if item != None:
+				filename=item.text()
+				delete(os.path.join(paths.tossesdir, filename))
+
+		def delTosses():
+			self.deleteTosses()
+			self.loadUnsentView()
+
 		self.unsentView=uic.loadUi("qtgui-files/unsent.ui")
-		self.unsentView.pushButton.clicked.connect(sendWrote)
-		self.unsentView.pushButton_2.clicked.connect(self.deleteTosses)
-		self.unsentView.pushButton_3.clicked.connect(self.loadUnsentView)
+		self.unsentView.pushButton.clicked.connect(delTosses)
+		self.unsentView.pushButton_2.clicked.connect(left)
+		self.unsentView.pushButton_3.clicked.connect(right)
+		self.unsentView.pushButton_4.clicked.connect(sendWrote)
+		self.unsentView.pushButton_5.clicked.connect(deleteFile)
+		self.unsentView.pushButton_6.clicked.connect(edit)
+		self.unsentView.pushButton_7.clicked.connect(self.loadUnsentView)
 		self.unsentView.textBrowser.anchorClicked.connect(openLink)
+		self.unsentView.listWidget.currentTextChanged.connect(updateView)
 	
 	def setupAdditional(self):
 		self.additional=uic.loadUi("qtgui-files/additional.ui")
@@ -814,35 +861,34 @@ class Form(QtWidgets.QMainWindow):
 		self.listWidget.clear()
 		self.listWidget.addItems(servers[index]["echoareas"])
 
-	def thread_loadUnsentView(self):
-		output=""
-
-		try:
-			print("get file list")
-			files=getOutList()
-			files.reverse()
-	
-			for msg in files:
-				print("loading "+msg)
-				s=getOutMsgEscape(msg)
-				repto=s.get("repto") or "-"
-				
-				if (repto!="-"):
-					repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
-	
-				output+="<a href='#out:"+msg+"'>"+msg+"</a><br />Ответ на: "+repto+"<br />"+s.get("echo")+"<br />"+s.get("subj")+"<br /><b>"+s.get("to")+"</b><br /><br />"+reparseMessage(s.get("msg"))+"<br /><br />"
-		except Exception as e:
-			self.newmsgq.put(e)
-			self.errorsq.put(["Ошибка: ", e])
-			return
-		self.newmsgq.put(output)
-
 	def loadUnsentView(self):
-		output=self.processNewThread(self.thread_loadUnsentView)
-		
-		if (not isinstance(output, Exception)):
-			self.unsentView.textBrowser.clear()
-			self.unsentView.textBrowser.setHtml(output)
+		def loader(self):
+			try:
+				print("get file list")
+				files=getOutList()
+				for msg in files:
+					self.newmsgq.put(msg)
+			except Exception as e:
+				self.newmsgq.put(e)
+				self.errorsq.put(["Ошибка: ", e])
+				return
+
+		self.processNewThread(loader, args=[self], takeResult=False)
+
+		self.unsentView.listWidget.clear()
+		while True:
+			queueFull=(not self.newmsgq.empty())
+			threadAlive=self.networkingThread.isAlive()
+			if (queueFull or threadAlive):
+				if (queueFull):
+					element=self.newmsgq.get(timeout=5)
+					self.unsentView.listWidget.insertItem(0, element)
+			else:
+				break
+		if self.unsentView.listWidget.count() == 0:
+			return False
+		self.unsentView.listWidget.setCurrentRow(0)
+		return True
 	
 	def updateMainView(self):
 		self.listWidget.clear()
@@ -876,8 +922,11 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.exec_()
 	
 	def execUnsentView(self):
-		self.loadUnsentView()
-		self.unsentView.exec_()
+		loaded=self.loadUnsentView()
+		if loaded:
+			self.unsentView.exec_()
+		else:
+			mbox("Исходящих нет")
 	
 	def execAdditional(self):
 		self.loadInfo_additional()
@@ -1071,17 +1120,12 @@ class Form(QtWidgets.QMainWindow):
 		self.helpWindow.textBrowser.setHtml(helpfile)
 
 		pm1=QtGui.QPixmap("artwork/iilogo.png")
-		self.pm2=QtGui.QPixmap("artwork/iipony.png")
 		self.helpWindow.label_2.setPixmap(pm1)
-		self.helpWindow.label_2.mouseReleaseEvent = self.setnext
 
 		self.helpWindow.textBrowser.anchorClicked.connect(openLink)
 
 	def showHelp(self):
 		self.helpWindow.show()
-	
-	def setnext(self,e):
-		self.helpWindow.label_2.setPixmap(self.pm2)
 	
 	def tabMovedEvent(self, first, second):
 		servers[first], servers[second] = servers[second], servers[first]
