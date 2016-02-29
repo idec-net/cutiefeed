@@ -326,6 +326,7 @@ class Form(QtWidgets.QMainWindow):
 				self.saveChanges()
 
 		self.mainwindow()
+		self.resize(980, 452) # фикс в тайловых WM по-умолчанию
 
 	def mainwindow(self):
 		setUIResize("qtgui-files/mainwindow.ui",self)

@@ -66,7 +66,7 @@ def getOutMsgEscape(name): # получаем сообщение и режем h
 def getOutList():
 	files=os.listdir(paths.tossesdir)
 	files=[x for x in files if x.endswith(".toss") or x.endswith(".out")]
-	files.sort()
+	files.sort(key=lambda x: int(x.strip(".toss").strip(".out")))
 	return files
 
 def b64d(str):
