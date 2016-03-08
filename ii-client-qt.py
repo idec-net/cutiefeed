@@ -20,7 +20,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
-commenttemplate=re.compile(r"(^|\s+)(PS|P\.S|ЗЫ|З\.Ы|\/\/|#).+$", re.MULTILINE | re.IGNORECASE)
+commenttemplate=re.compile(r"(^|(\w\s+))(PS|P\.S|ЗЫ|З\.Ы|\/\/|#)(.+$)", re.MULTILINE | re.IGNORECASE)
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
 
 def getproxy():
@@ -234,7 +234,7 @@ def reparseMessage(string):
 	global urltemplate, quotetemplate, commenttemplate, ii_link
 	string=urltemplate.sub("<a href='\g<0>'>\g<0></a>", string)
 	string=quotetemplate.sub("<font color='green'>\g<0></font>", string)
-	string=commenttemplate.sub("<font color='brown'>\g<0></font>", string)
+	string=commenttemplate.sub("\g<1><font color='brown'>\g<3>\g<4></font>", string)
 	string=ii_link.sub("<a href='#ii:\g<1>'>\g<0></a>", string)
 
 	strings=string.splitlines()
@@ -248,7 +248,7 @@ def reparseMessage(string):
 			else:
 				pre_flag=False
 				strings[i]="====</pre>"
-	
+
 	return "<br />".join(strings)
 
 def openLink(link):
