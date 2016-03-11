@@ -39,7 +39,7 @@ defaultServersValues={
 	"authstr": "",
 	"echoareas": ["ii.test.14", "mlp.15"],
 	"xcenable": True,
-	"advancedue": False,
+	"advancedue": True,
 	"pervasiveue": False,
 	"uelimit": 200
 }

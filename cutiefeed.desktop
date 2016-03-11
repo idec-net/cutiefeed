@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=CutieFeed
+Comment=Qt client for ii-based networks
+Comment[ru]=Клиент для ii-подобных сетей (Qt)
+Exec=cutiefeed
+Icon=cutiefeed
+Terminal=false
+Type=Application
+Categories=Qt;KDE;Network;
+StartupNotify=true

@@ -67,7 +67,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Qt-клиент для cети ii</string>
+            <string>CutieFeed</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
