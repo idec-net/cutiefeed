@@ -29,7 +29,7 @@ def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False):
 			p = urllib.request.urlopen(file, data, timeout=20.0)
 	
 	if not p:
-		p = urllib.request.urlopen(file, data)
+		p = urllib.request.urlopen(file, data, timeout=15.0)
 	
 	if return_descriptor:
 		return p
