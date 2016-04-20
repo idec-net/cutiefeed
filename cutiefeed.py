@@ -86,7 +86,7 @@ def load_raw_file(adress, data=None):
 		except Exception as e:
 			form.errorsq.put(["Ошибка скачивания: ", e])
 			form.newmsgq.put("")
-	
+
 	return form.processNewThread(loadFunction)
 
 def prettier_size(n,pow=0,b=1024,u='B',pre=['']+[p+'i'for p in'KMGTPEZY']):
@@ -101,10 +101,10 @@ def xfile_download(server, filename, savename, signal):
 		form.errorsq.put(["Ошибка скачивания: ", e])
 		form.newmsgq.put("Ну не получилось, чего поделаешь!")
 		return
-	
+
 	file_size=0
 	block_size=8192
-	
+
 	f=open(savename, "wb")
 	while True:
 		buffer=out.read(block_size)
@@ -123,12 +123,12 @@ def updatemsg():
 
 	if echocount == 0: # если мы в пустой эхе, кнопки нам не нужны
 		return
-	
+
 	msgid_answer=msglist[msgnumber]
 	msg=getMsgEscape(msgid_answer)
-	
+
 	repto=msg.get("repto") or "-"
-		
+
 	if (repto!="-"):
 		repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
 
@@ -136,7 +136,7 @@ def updatemsg():
 
 	form.listWidget.setCurrentRow(msgnumber)
 	form.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
-	
+
 	if config["rememberEchoPosition"] and form.echoPosition != None:
 		form.echoPosition[echo]=echocount-msgnumber
 
@@ -176,7 +176,7 @@ def sendWrote_operation():
 		form.newmsgq.put(e)
 		form.errorsq.put(["Ошибка отправки: ", e])
 	form.newmsgq.put(countsent)
-	
+
 def sendWrote(event):
 	result=form.processNewThread(sendWrote_operation)
 
@@ -253,7 +253,7 @@ def reparseMessage(string):
 
 def openLink(link):
 	link=link.toString()
-	
+
 	if (link.startswith("#")): # если перед нами ii-ссылка
 		link=link[1:] # срезаем первые ненужные символы
 		data=link.split(":")
@@ -343,17 +343,17 @@ class Form(QtWidgets.QMainWindow):
 
 		for server in servers:
 			self.comboBox.addItem(server["adress"])
-		
+
 		self.comboBox.currentIndexChanged.connect(self.loadEchoList)
 		self.listWidget.itemActivated.connect(self.openViewWindow)
 		self.loadEchoList()
-		
+
 	def viewwindow(self, echoarea):
 		global msglist,msgnumber,listlen,echo
 		echo=echoarea
 
 		setUIResize("qtgui-files/viewwindow.ui",self)
-		
+
 		self.setWindowTitle("Просмотр сообщений: "+echoarea)
 
 		msglist=getMsgList(echo)
@@ -363,7 +363,7 @@ class Form(QtWidgets.QMainWindow):
 			if self.echoPosition == None:
 				self.echoPosition=get_pos_cache()
 			msgnumber=get_position(echo, self.echoPosition)
-			
+
 			if msgnumber == None or msgnumber >= listlen:
 				msgnumber = 0
 			else:
@@ -376,7 +376,7 @@ class Form(QtWidgets.QMainWindow):
 
 		self.listWidget.currentRowChanged.connect(lbselect)
 		self.listWidget.setCurrentRow(msgnumber)
-		
+
 		self.pushButton.clicked.connect(self.mainwindow)
 		self.pushButton_2.clicked.connect(msgminus)
 		self.pushButton_3.clicked.connect(msgplus)
@@ -395,7 +395,7 @@ class Form(QtWidgets.QMainWindow):
 		self.pushButton_2.clicked.connect(self.mainwindow)
 		self.newMsgTextBrowser.setParent(self)
 		self.verticalLayout.addWidget(self.newMsgTextBrowser)
-	
+
 	def processNewThread(self, function, args=[], takeResult=True):
 		if self.networkingThread.isAlive():
 			return
@@ -410,15 +410,15 @@ class Form(QtWidgets.QMainWindow):
 			if (not gprintq.empty()):
 				debugform.addText(gprintq.get())
 			app.processEvents()
-		
+
 		while (not self.errorsq.empty()):
 			error=self.errorsq.get()
 			mbox(error[0]+'\n\n'+str(error[1]))
 
 		self.networkingThread.join()
-		
+
 		debugform.disappear()
-		
+
 		if takeResult:
 			return self.newmsgq.get()
 
@@ -492,12 +492,12 @@ class Form(QtWidgets.QMainWindow):
 				break
 			except Exception as e:
 				self.errorsq.put([server["adress"]+": ошибка получения сообщений (проблемы с интернетом?)", e])
-	
+
 	def getNewText(self):
 		self.newMsgTextBrowser=QtWidgets.QTextBrowser(None)
 		self.newMsgTextBrowser.anchorClicked.connect(openLink)
 		self.newMsgTextBrowser.setOpenLinks(False)
-		
+
 		self.updateSignal.connect(self.newMsgTextBrowser.append, QtCore.Qt.QueuedConnection)
 
 		self.gotMsgs=False
@@ -515,7 +515,7 @@ class Form(QtWidgets.QMainWindow):
 						msgid=arr.get('id')
 						echo=arr.get('echo')
 						subj=arr.get('subj')
-						
+
 						if cache_exists(echo):
 							append_subj_cache(subj, echo)
 
@@ -545,20 +545,20 @@ class Form(QtWidgets.QMainWindow):
 			if (not gprintq.empty()):
 				debugform.addText(gprintq.get())
 			app.processEvents()
-		
+
 		while (not self.errorsq.empty()):
 			error=self.errorsq.get()
 			mbox(error[0]+'\n\n'+str(error[1]))
 
 		self.networkingThread.join()
 		self.updateTB.join()
-		
+
 		debugform.disappear()
-		
+
 		if not self.gotMsgs:
 			self.newMsgTextBrowser.destroy()
 			mbox('Новых сообщений нет.')
-	
+
 	def deleteTosses(self):
 		answer=self.clearMessages.exec_()
 		counter=0
@@ -573,7 +573,7 @@ class Form(QtWidgets.QMainWindow):
 					if filename[-5:]==".toss":
 						counter+=1
 						delete(os.path.join(paths.tossesdir, filename))
-			
+
 			if counter>0:
 				mbox("Удалено сообщений: "+str(counter))
 			else:
@@ -588,7 +588,7 @@ class Form(QtWidgets.QMainWindow):
 				if filename[:5]=="base-":
 					counter+=1
 					delete(os.path.join(paths.datadir, filename))
-			
+
 			if counter>0:
 				mbox("Удалено файлов: "+str(counter))
 			else:
@@ -609,7 +609,7 @@ class Form(QtWidgets.QMainWindow):
 			for filename in os.listdir(paths.subjcachedir):
 				delete(os.path.join(paths.subjcachedir, filename))
 				counter+=1
-			
+
 			if counter>0:
 				mbox("Удалено файлов: "+str(counter))
 			else:
@@ -636,7 +636,7 @@ class Form(QtWidgets.QMainWindow):
 				delete(os.path.join(paths.subjcachedir, echoarea))
 			self.processNewThread(function, takeResult=False)
 			self.additional_update_echoes()
-	
+
 	def deleteAllEchoes(self):
 		countItems=self.additional.comboBox_2.count()
 
@@ -674,7 +674,7 @@ class Form(QtWidgets.QMainWindow):
 		deleteCacheAction=QtWidgets.QAction("Удалить кэш", self)
 		helpAction=QtWidgets.QAction("Справка", self)
 		unsentViewAction=QtWidgets.QAction("Просмотр исходящих", self)
-		
+
 		clientSettingsAction.triggered.connect(self.execClientConfig)
 		serversSettingsAction.triggered.connect(self.execServersConfig)
 		saveSettingsAction.triggered.connect(self.saveChanges)
@@ -692,7 +692,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clMenu.addAction(serversSettingsAction)
 		self.clMenu.addAction(saveSettingsAction)
 		self.clMenu.addAction(additionalFeaturesAction)
-		
+
 		self.clMenu.addSeparator()
 		self.clMenu.addAction(deleteTossesAction)
 		self.clMenu.addAction(deleteXCAction)
@@ -738,7 +738,7 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.addTabButton.clicked.connect(self.tabAddRequest)
 		self.serversConfig.deleteTabButton.clicked.connect(self.tabDeleteRequest)
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
-	
+
 	def setupUnsentView(self):
 		def updateView(filename):
 			if filename == "": # например, если мы удалили последнее
@@ -747,7 +747,7 @@ class Form(QtWidgets.QMainWindow):
 
 			s=getOutMsgEscape(filename)
 			repto=s.get("repto") or "-"
-			
+
 			if (repto!="-"):
 				repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
 
@@ -794,7 +794,7 @@ class Form(QtWidgets.QMainWindow):
 		self.unsentView.pushButton_7.clicked.connect(self.loadUnsentView)
 		self.unsentView.textBrowser.anchorClicked.connect(openLink)
 		self.unsentView.listWidget.currentTextChanged.connect(updateView)
-	
+
 	def setupAdditional(self):
 		self.additional=uic.loadUi("qtgui-files/additional.ui")
 		self.additional.filename=""
@@ -809,7 +809,7 @@ class Form(QtWidgets.QMainWindow):
 		self.dl_label_signal.connect(self.dl_set_label, QtCore.Qt.QueuedConnection)
 		self.additional.tableView.doubleClicked.connect(self.try_load_file)
 		self.additional.tableView.horizontalHeader().setStretchLastSection(True)
-		
+
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
 		self.clientConfig.lineEdit_2.setText(config["proxy"])
@@ -819,7 +819,7 @@ class Form(QtWidgets.QMainWindow):
 
 		if (len(config["offline-echoareas"])>0):
 			self.clientConfig.listWidget.setCurrentRow(0)
-		
+
 		self.clientConfig.checkBox.setChecked(config["defaultEditor"])
 		self.clientConfig.checkBox_2.setChecked(config["firstrun"])
 		self.clientConfig.checkBox_3.setChecked(config["autoSaveChanges"])
@@ -847,7 +847,7 @@ class Form(QtWidgets.QMainWindow):
 		is_ue_enabled=curr["advancedue"]
 		self.serversConfig.checkBox_3.setEnabled(is_ue_enabled)
 		self.serversConfig.spinBox.setEnabled(is_ue_enabled)
-	
+
 	def loadInfo_additional(self):
 		self.additional.comboBox.clear()
 		self.additional.comboBox_3.clear()
@@ -857,7 +857,7 @@ class Form(QtWidgets.QMainWindow):
 			self.additional.comboBox_3.addItem(server["adress"])
 
 		self.additional_update_echoes()
-	
+
 	def loadEchoList(self, index=0):
 		self.listWidget.clear()
 		self.listWidget.addItems(servers[index]["echoareas"])
@@ -890,12 +890,12 @@ class Form(QtWidgets.QMainWindow):
 			return False
 		self.unsentView.listWidget.setCurrentRow(0)
 		return True
-	
+
 	def updateMainView(self):
 		self.listWidget.clear()
 		index=self.comboBox.currentIndex()
 		self.listWidget.addItems(servers[index]["echoareas"])
-		
+
 		self.comboBox.clear()
 		for server in servers:
 			self.comboBox.addItem(server["adress"])
@@ -905,12 +905,12 @@ class Form(QtWidgets.QMainWindow):
 
 		echolist=os.listdir(paths.indexdir)
 		self.additional.comboBox_2.addItems(echolist)
-	
+
 	def execClientConfig(self):
 		self.loadInfo_client()
 		self.currLw=self.clientConfig.listWidget
 		self.clientConfig.exec_()
-	
+
 	def execServersConfig(self):
 		self.serversConfig.tabBar.setCurrentIndex(0)
 		self.loadInfo_servers(0)
@@ -919,20 +919,20 @@ class Form(QtWidgets.QMainWindow):
 
 		for i in range(len(servers)):
 			self.serversConfig.tabBar.setTabText(i, str(i+1))
-		
+
 		self.serversConfig.exec_()
-	
+
 	def execUnsentView(self):
 		loaded=self.loadUnsentView()
 		if loaded:
 			self.unsentView.exec_()
 		else:
 			mbox("Исходящих нет")
-	
+
 	def execAdditional(self):
 		self.loadInfo_additional()
 		self.additional.exec_()
-	
+
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
 		config["proxy"]=self.clientConfig.lineEdit_2.text()
@@ -951,7 +951,7 @@ class Form(QtWidgets.QMainWindow):
 			config["offline-echoareas"].append(self.clientConfig.listWidget.item(index).text())
 
 		self.saveOrNot()
-	
+
 	def applyServersConfig(self, index=0):
 		servers[index]["adress"]=self.serversConfig.lineEdit.text()
 		servers[index]["authstr"]=self.serversConfig.lineEdit_2.text()
@@ -962,14 +962,14 @@ class Form(QtWidgets.QMainWindow):
 
 		servers[index]["echoareas"]=[]
 		count=self.serversConfig.listWidget.count()
-		
+
 		for itemNumber in range(0,count):
 			servers[index]["echoareas"].append(self.serversConfig.listWidget.item(itemNumber).text())
 
 		config["servers"]=servers
-		
+
 		self.saveOrNot()
-	
+
 	def load_list_txt(self):
 		rawlist=load_raw_file(self.serversConfig.lineEdit.text()+"list.txt")
 		echoes=[x.split(":") for x in rawlist.splitlines()]
@@ -1010,7 +1010,7 @@ class Form(QtWidgets.QMainWindow):
 	def choose_blacklist_file(self):
 		filename=QtWidgets.QFileDialog.getOpenFileName(self.additional, "Выбрать файл ЧС", paths.homedir, filter="Текстовые файлы (*.txt)")[0]
 		self.additional.filename=filename
-	
+
 	def copy_blacklist_txt(self):
 		if self.additional.filename == "":
 			mbox("Файл не выбран!")
@@ -1019,14 +1019,14 @@ class Form(QtWidgets.QMainWindow):
 			shutil.copy(self.additional.filename, paths.blacklistfile)
 			blacklist_func.blacklist=blacklist_func.getBlackList()
 			mbox("ЧС скопирован, можно чистить")
-	
+
 	def blacklist_cleanup(self):
 		def worker():
 			echolist=os.listdir(paths.indexdir)
 			blacklist_func.blacklistCleanup(echolist)
 
 		self.processNewThread(worker, takeResult=False)
-	
+
 	def try_load_xfilelist(self):
 		index=self.additional.comboBox.currentIndex()
 		server=servers[index]
@@ -1050,15 +1050,15 @@ class Form(QtWidgets.QMainWindow):
 					filearr.append([a[0], prettier_size(int(a[1])), a[2]])
 			model=QtGui.QStandardItemModel(len(filearr), 3)
 			self.additional.tableView.setModel(model)
-	
+
 			for row in range(len(filearr)):
 				for col in range(3):
 					index=model.index(row, col)
 					model.setData(index, filearr[row][col])
-	
+
 			self.additional.tableView.resizeRowsToContents()
 			self.additional.tableView.resizeColumnsToContents()
-	
+
 	def try_load_file(self, index):
 		i=self.additional.comboBox.currentIndex()
 		server=servers[i]
@@ -1067,7 +1067,7 @@ class Form(QtWidgets.QMainWindow):
 		row=index.row()
 		filename=model.index(row, 0).data()
 		expectSize=model.index(row, 1).data()
-		
+
 		savename=QtWidgets.QFileDialog.getSaveFileName(self.additional, "Куда сохраняем", paths.homedir+"/"+filename)[0]
 		if savename=="":
 			return
@@ -1109,7 +1109,7 @@ class Form(QtWidgets.QMainWindow):
 				mbox("Настройки сохранены")
 		else:
 			mbox("Упс, сохранить не получилось, смотри в логи.")
-	
+
 	def saveOrNot(self): # смотрим, стоит ли автосохранение настроек
 		# если стоит, то сохраняем их
 		if config["autoSaveChanges"]:
@@ -1127,44 +1127,44 @@ class Form(QtWidgets.QMainWindow):
 
 	def showHelp(self):
 		self.helpWindow.show()
-	
+
 	def tabMovedEvent(self, first, second):
 		servers[first], servers[second] = servers[second], servers[first]
 		self.oldCurrentTab=self.serversConfig.tabBar.currentIndex()
-	
+
 	def tabAddRequest(self):
 		servers.append(defaultServersValues)
 		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
 		self.serversConfig.tabBar.setCurrentIndex(newindex)
-	
+
 	def tabDeleteRequest(self):
 		currindex=self.serversConfig.tabBar.currentIndex()
 		self.serversConfig.tabBar.removeTab(currindex)
 		del servers[currindex]
 		self.loadInfo_servers(self.serversConfig.tabBar.currentIndex())
-	
+
 	def openViewWindow(self, item):
 		echoarea=item.text()
 		self.viewwindow(echoarea)
-	
+
 	def displayOfflineEchos(self):
 		self.listWidget.clear()
-		
+
 		if len(config["offline-echoareas"]) > 0:
 			self.listWidget.addItems(config["offline-echoareas"])
-	
+
 	def openMessageView(self, msgid):
 		global echo, msgid_answer # сохраняем msgid исходной эхи, чтобы
 		tmpecho=str(echo) # можно было бы отвечать на сообщения
 		tmpmsgid=str(msgid_answer) # после закрытия диалога
 
 		msg=getMsgEscape(msgid)
-		
+
 		repto=msg.get("repto") or "-"
-			
+
 		if (repto!="-"):
 			repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
-		
+
 		msgtext="msgid: "+msgid+"<br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
 
 		msgid_answer=msgid # меняем глобальный msgid для
@@ -1181,7 +1181,7 @@ class Form(QtWidgets.QMainWindow):
 		echo=tmpecho
 
 		dialog.destroy()
-	
+
 	def closeEvent(self, event):
 		if config["rememberEchoPosition"] and self.echoPosition != None:
 			save_pos_cache(self.echoPosition)
@@ -1205,17 +1205,17 @@ class debugForm(QtWidgets.QDialog):
 		super(debugForm, self).__init__()
 		setUIResize("qtgui-files/debugview.ui",self)
 		self.pushButton.clicked.connect(self.user_stop)
-	
+
 	def user_stop(self):
 		ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(form.networkingThread.ident),ctypes.py_object(stoppedDownloadException))
-	
+
 	def addText(sender, text):
 		debugform.textBrowser.append(text)
-	
+
 	def appear(self):
 		debugform.textBrowser.clear()
 		debugform.show()
-	
+
 	def disappear(self):
 		gprintq.queue.clear()
 		debugform.textBrowser.clear()
