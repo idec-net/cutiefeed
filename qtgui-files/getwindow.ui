@@ -44,12 +44,18 @@
          <property name="text">
           <string>К списку эх</string>
          </property>
+         <property name="shortcut">
+          <string>Ctrl+B</string>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
           <string>Скачать ещё сообщения</string>
+         </property>
+         <property name="shortcut">
+          <string>Alt+F</string>
          </property>
         </widget>
        </item>

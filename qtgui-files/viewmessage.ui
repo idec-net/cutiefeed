@@ -26,12 +26,18 @@
          <property name="text">
           <string>Ответить</string>
          </property>
+         <property name="shortcut">
+          <string>Alt+R</string>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="CloseButton">
          <property name="text">
           <string>Закрыть</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+Q</string>
          </property>
         </widget>
        </item>

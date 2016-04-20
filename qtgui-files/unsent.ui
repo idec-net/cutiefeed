@@ -163,6 +163,9 @@
                <iconset>
                 <normaloff>../artwork/view-refresh.svg</normaloff>../artwork/view-refresh.svg</iconset>
               </property>
+              <property name="shortcut">
+               <string>Ctrl+R</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -182,6 +185,9 @@
               <property name="text">
                <string>&lt;</string>
               </property>
+              <property name="shortcut">
+               <string>Ctrl+P</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -194,6 +200,9 @@
               </property>
               <property name="text">
                <string>&gt;</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+N</string>
               </property>
              </widget>
             </item>
@@ -208,12 +217,18 @@
               <property name="text">
                <string>Правка</string>
               </property>
+              <property name="shortcut">
+               <string>Alt+E</string>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_5">
               <property name="text">
                <string>Удалить</string>
+              </property>
+              <property name="shortcut">
+               <string>Del</string>
               </property>
              </widget>
             </item>
@@ -222,12 +237,18 @@
               <property name="text">
                <string>Отправить</string>
               </property>
+              <property name="shortcut">
+               <string>Alt+S</string>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton">
               <property name="text">
                <string>Удалить все</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+Backspace</string>
               </property>
              </widget>
             </item>

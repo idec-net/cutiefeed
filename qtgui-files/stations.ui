@@ -34,6 +34,9 @@
         <iconset>
          <normaloff>../artwork/filenew.svg</normaloff>../artwork/filenew.svg</iconset>
        </property>
+       <property name="shortcut">
+        <string>Ctrl+T</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -50,6 +53,9 @@
        <property name="icon">
         <iconset>
          <normaloff>../artwork/remove.svg</normaloff>../artwork/remove.svg</iconset>
+       </property>
+       <property name="shortcut">
+        <string>Ctrl+W</string>
        </property>
       </widget>
      </item>

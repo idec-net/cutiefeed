@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>967</width>
-    <height>450</height>
+    <width>990</width>
+    <height>449</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,10 +113,10 @@
          <widget class="QWidget" name="scrollAreaWidgetContents_2">
           <property name="geometry">
            <rect>
-            <x>-39</x>
+            <x>0</x>
             <y>0</y>
-            <width>720</width>
-            <height>40</height>
+            <width>724</width>
+            <height>50</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -137,6 +137,9 @@
              <property name="text">
               <string>К списку эх</string>
              </property>
+             <property name="shortcut">
+              <string>Ctrl+B</string>
+             </property>
             </widget>
            </item>
            <item>
@@ -149,6 +152,9 @@
              </property>
              <property name="text">
               <string>&lt;</string>
+             </property>
+             <property name="shortcut">
+              <string>Ctrl+P</string>
              </property>
             </widget>
            </item>
@@ -163,12 +169,18 @@
              <property name="text">
               <string>&gt;</string>
              </property>
+             <property name="shortcut">
+              <string>Ctrl+N</string>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_6">
              <property name="text">
               <string>Новое</string>
+             </property>
+             <property name="shortcut">
+              <string>Alt+N</string>
              </property>
             </widget>
            </item>
@@ -177,6 +189,9 @@
              <property name="text">
               <string>Ответить</string>
              </property>
+             <property name="shortcut">
+              <string>Alt+R</string>
+             </property>
             </widget>
            </item>
            <item>
@@ -184,12 +199,18 @@
              <property name="text">
               <string>Отправить всё</string>
              </property>
+             <property name="shortcut">
+              <string>Alt+S</string>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_7">
              <property name="text">
               <string>Скачать сообщения</string>
+             </property>
+             <property name="shortcut">
+              <string>Alt+F</string>
              </property>
             </widget>
            </item>
@@ -219,6 +240,9 @@
                <width>24</width>
                <height>24</height>
               </size>
+             </property>
+             <property name="shortcut">
+              <string>Alt+M</string>
              </property>
             </widget>
            </item>
