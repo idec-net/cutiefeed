@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import sys
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
+import sys
 from getcfg import *
 from ii_functions import *
 import network
@@ -15,8 +16,6 @@ import ctypes
 import queue
 import json, shutil, math
 import urllib.parse
-
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
