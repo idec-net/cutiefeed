@@ -1032,7 +1032,7 @@ class Form(QtWidgets.QMainWindow):
 
 		data = urllib.parse.urlencode({'pauth': server["authstr"]}).encode('utf8')
 
-		result=load_raw_file(server["adress"] + 'x/file', data)
+		result=load_raw_file(server["adress"] + 'x/filelist', data)
 		if result == "" or result == None:
 			mbox("Что-то здесь не то (сервер не поддерживает /x/file или проблемы с интернетом)")
 		else:
