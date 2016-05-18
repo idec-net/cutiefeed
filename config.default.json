@@ -9,6 +9,7 @@
 				"lor-opennet.15",
 				"mlp.15"
 			],
+			"fetch_enabled":true,
 			"xcenable":true,
 			"advancedue":true,
 			"pervasiveue": false,
@@ -21,6 +22,7 @@
 				"spline.creepy.14",
 				"spline.local.14"
 			],
+			"fetch_enabled":true,
 			"xcenable":false,
 			"advancedue":false,
 			"pervasiveue": false,

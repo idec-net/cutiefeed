@@ -478,6 +478,9 @@ class Form(QtWidgets.QMainWindow):
 
 		proxy_config=getproxy()
 		for server in servers:
+			if not server["fetch_enabled"]:
+				print("skip fetching " + server["adress"])
+				continue
 			try:
 				if (server["advancedue"] == False):
 					uelimit=False
@@ -841,6 +844,7 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.checkBox.setChecked(curr["xcenable"])
 		self.serversConfig.checkBox_2.setChecked(curr["advancedue"])
 		self.serversConfig.checkBox_3.setChecked(curr["pervasiveue"])
+		self.serversConfig.checkBox_4.setChecked(curr["fetch_enabled"])
 		self.serversConfig.spinBox.setValue(curr["uelimit"])
 
 		is_ue_enabled=curr["advancedue"]
@@ -957,6 +961,7 @@ class Form(QtWidgets.QMainWindow):
 		servers[index]["xcenable"]=self.serversConfig.checkBox.isChecked()
 		servers[index]["advancedue"]=self.serversConfig.checkBox_2.isChecked()
 		servers[index]["pervasiveue"]=self.serversConfig.checkBox_3.isChecked()
+		servers[index]["fetch_enabled"]=self.serversConfig.checkBox_4.isChecked()
 		servers[index]["uelimit"]=self.serversConfig.spinBox.value()
 
 		servers[index]["echoareas"]=[]

@@ -38,6 +38,7 @@ defaultServersValues={
 	"adress": "http://ii-net.tk/ii/ii-point.php?q=/",
 	"authstr": "",
 	"echoareas": ["ii.test.14", "mlp.15"],
+	"fetch_enabled": True,
 	"xcenable": True,
 	"advancedue": True,
 	"pervasiveue": False,

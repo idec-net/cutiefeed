@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>540</height>
+    <width>524</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,6 +105,23 @@
        </layout>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox_4">
+        <property name="text">
+         <string>Включить эту станцию</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="checkBox">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта схема позволяет экономить трафик по количеству сообщений. То есть если в эху никто не написал, то лишние запросы не производятся.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -113,7 +130,7 @@
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>Включить ii-схему /x/c</string>
+         <string>Поддержка схемы IDEC /x/c</string>
         </property>
        </widget>
       </item>
