@@ -311,6 +311,8 @@ class Form(QtWidgets.QMainWindow):
 		self.setWindowIcon(windowIcon)
 		self.mbox=QtWidgets.QMessageBox()
 		self.mbox.setText("")
+		self.boldFont=QtGui.QFont()
+		self.boldFont.setBold(True)
 
 		# настраиваем диалог удаления тоссов
 
@@ -906,6 +908,8 @@ class Form(QtWidgets.QMainWindow):
 					list_item.setText(element[-20:])
 					list_item.setToolTip(element)
 					list_item.setData(QtCore.Qt.UserRole, element)
+					if element[-5:] == ".toss":
+						list_item.setFont(self.boldFont)
 
 					self.unsentView.listWidget.insertItem(0, list_item)
 			else:

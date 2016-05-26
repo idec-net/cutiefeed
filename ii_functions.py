@@ -68,7 +68,7 @@ def getOutList(servers):
 	for server in servers:
 		target_dir = os.path.join(paths.tossesdir, server["outbox_storage_id"])
 		contents=[x for x in os.listdir(target_dir) if x.endswith(".toss") or x.endswith(".out")]
-		contents.sort(key=lambda x: int(x.strip(".toss").strip(".out")))
+		contents.sort(key=lambda x: int(x.strip(".toss").strip(".out")), reverse=True)
 		files+=[os.path.join(target_dir, x) for x in contents]
 	return files
 
