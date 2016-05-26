@@ -22,6 +22,23 @@ quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE 
 commenttemplate=re.compile(r"(^|(\w\s+))(PS|P\.S|ЗЫ|З\.Ы|\/\/|#)(.+$)", re.MULTILINE | re.IGNORECASE)
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
 
+def get_favorites():
+	try:
+		f=open(paths.favoritesfile)
+		storage=json.load(f)
+		f.close()
+		return storage
+	except:
+		return {"list":[], "subjes":{}}
+
+def save_favorites(array):
+	try:
+		f=open(paths.favoritesfile, "w")
+		json.dump(array, f)
+		f.close()
+	except Exception as e:
+		print("Ошибка сохранения списка избранных сообщений: "+str(e))
+
 def outbox_id_by_address(addr):
 	for server in config["servers"]:
 		if server["adress"] == addr:
@@ -150,6 +167,11 @@ def updatemsg():
 
 	if config["rememberEchoPosition"] and form.echoPosition != None:
 		form.echoPosition[echo]=echocount-msgnumber
+
+	if msgid_answer in form.favorites_array["list"]:
+		form.checkBox.setChecked(True)
+	else:
+		form.checkBox.setChecked(False)
 
 def msgminus(event):
 	global msgnumber
@@ -313,6 +335,7 @@ class Form(QtWidgets.QMainWindow):
 		self.mbox.setText("")
 		self.boldFont=QtGui.QFont()
 		self.boldFont.setBold(True)
+		self.favoritesChanged=False
 
 		# настраиваем диалог удаления тоссов
 
@@ -328,6 +351,7 @@ class Form(QtWidgets.QMainWindow):
 		self.setupServersConfig()
 		self.setupUnsentView()
 		self.setupAdditional()
+		self.setupFavorites()
 		self.setupMenu()
 		self.setupHelp()
 
@@ -400,6 +424,7 @@ class Form(QtWidgets.QMainWindow):
 		self.pushButton_5.clicked.connect(answer)
 		self.pushButton_6.clicked.connect(c_writeNew)
 		self.pushButton_7.clicked.connect(self.getNewText)
+		self.checkBox.clicked.connect(self.favorites_toggle)
 
 		self.menuButton.setMenu(self.clMenu)
 		self.textBrowser.anchorClicked.connect(openLink)
@@ -692,6 +717,7 @@ class Form(QtWidgets.QMainWindow):
 		deleteCacheAction=QtWidgets.QAction("Удалить кэш", self)
 		helpAction=QtWidgets.QAction("Справка", self)
 		unsentViewAction=QtWidgets.QAction("Просмотр исходящих", self)
+		favoritesAction=QtWidgets.QAction("Избранные сообщения", self)
 
 		clientSettingsAction.triggered.connect(self.execClientConfig)
 		serversSettingsAction.triggered.connect(self.execServersConfig)
@@ -702,8 +728,10 @@ class Form(QtWidgets.QMainWindow):
 		deleteCacheAction.triggered.connect(self.deleteCache)
 		helpAction.triggered.connect(self.showHelp)
 		unsentViewAction.triggered.connect(self.execUnsentView)
+		favoritesAction.triggered.connect(self.execFavorites)
 
 		self.clMenu.addAction(unsentViewAction)
+		self.clMenu.addAction(favoritesAction)
 		self.clMenu.addSeparator()
 
 		self.clMenu.addAction(clientSettingsAction)
@@ -758,7 +786,6 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
 
 	def setupUnsentView(self):
-		# TODO: проработать под новую ситуацию
 		def updateView(item):
 			if item == None: # например, если мы удалили последнее
 				self.unsentView.textBrowser.clear()
@@ -830,6 +857,54 @@ class Form(QtWidgets.QMainWindow):
 		self.additional.tableView.doubleClicked.connect(self.try_load_file)
 		self.additional.tableView.horizontalHeader().setStretchLastSection(True)
 
+	def setupFavorites(self):
+		def updateView(item):
+			if item == None:
+				self.favorites.textBrowser.clear()
+				return
+
+			msgid = item.data(QtCore.Qt.UserRole)
+			msg=getMsgEscape(msgid)
+			echo=msg.get("echo")
+			repto=msg.get("repto") or "-"
+
+			if repto!="-":
+				repto="<a href='#ii:"+repto+"'>"+repto+"</a>"
+
+			msgtext="<a href='#ii:"+echo+"'>"+echo+"</a><br />msgid: <a href='#answer:"+msgid+"'>"+msgid+"</a><br />"+"Ответ на: "+repto+"<br />"+formatDate(msg.get('time'))+"<br />"+msg.get('subj')+"<br /><b>"+msg.get('sender')+" ("+msg.get('addr')+")  ->  "+msg.get('to')+"</b><br />"
+
+			self.favorites.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
+
+		def left():
+			msgnumber=self.favorites.listWidget.currentRow()
+			if(msgnumber>0):
+				msgnumber-=1;
+				self.favorites.listWidget.setCurrentRow(msgnumber)
+
+		def right():
+			msgnumber=self.favorites.listWidget.currentRow()
+			listlen=self.favorites.listWidget.count()
+			if(msgnumber<(listlen-1)):
+				msgnumber+=1;
+				self.favorites.listWidget.setCurrentRow(msgnumber)
+
+		def deleteFavorite():
+			self.favoritesChanged=True
+			msgnumber=self.favorites.listWidget.currentRow()
+			item=self.favorites.listWidget.takeItem(msgnumber)
+			if item != None:
+				msgid=item.data(QtCore.Qt.UserRole)
+				self.favorites_array["list"].remove(msgid)
+				del self.favorites_array["subjes"][msgid]
+
+		self.favorites=uic.loadUi("qtgui-files/favorites.ui")
+		self.favorites.pushButton_2.clicked.connect(left)
+		self.favorites.pushButton_3.clicked.connect(right)
+		self.favorites.pushButton_5.clicked.connect(deleteFavorite)
+		self.favorites.listWidget.currentItemChanged.connect(updateView)
+		self.favorites.textBrowser.anchorClicked.connect(openLink)
+		self.favorites_array = get_favorites()
+
 	def loadInfo_client(self):
 		self.clientConfig.lineEdit.setText(config["editor"])
 		self.clientConfig.lineEdit_2.setText(config["proxy"])
@@ -878,6 +953,16 @@ class Form(QtWidgets.QMainWindow):
 			self.additional.comboBox_3.addItem(server["adress"])
 
 		self.additional_update_echoes()
+
+	def loadInfo_favorites(self):
+		self.favorites.listWidget.clear()
+		messages = self.favorites_array["list"]
+		for msgid in reversed(messages):
+			list_item=QtWidgets.QListWidgetItem(self.favorites.listWidget)
+			list_item.setText(self.favorites_array["subjes"][msgid])
+			list_item.setData(QtCore.Qt.UserRole, msgid)
+
+			self.favorites.listWidget.insertItem(0, list_item)
 
 	def loadEchoList(self, index=0):
 		self.listWidget.clear()
@@ -928,6 +1013,19 @@ class Form(QtWidgets.QMainWindow):
 		for server in servers:
 			self.comboBox.addItem(server["adress"])
 
+	def favorites_toggle(self, state):
+		global msgid_answer
+		self.favoritesChanged = True
+		checked = self.checkBox.isChecked()
+
+		if not checked:
+			del self.favorites_array["subjes"][msgid_answer]
+			self.favorites_array["list"].remove(msgid_answer)
+		else:
+			subj = self.listWidget.currentItem().text()
+			self.favorites_array["subjes"][msgid_answer]=subj
+			self.favorites_array["list"].append(msgid_answer)
+
 	def additional_update_echoes(self):
 		self.additional.comboBox_2.clear()
 
@@ -960,6 +1058,11 @@ class Form(QtWidgets.QMainWindow):
 	def execAdditional(self):
 		self.loadInfo_additional()
 		self.additional.exec_()
+
+	def execFavorites(self):
+		self.loadInfo_favorites()
+		self.favorites.listWidget.setCurrentRow(0)
+		self.favorites.exec_()
 
 	def applyClientConfig(self):
 		config["editor"]=self.clientConfig.lineEdit.text()
@@ -1236,18 +1339,22 @@ class Form(QtWidgets.QMainWindow):
 		if config["rememberEchoPosition"] and self.echoPosition != None:
 			save_pos_cache(self.echoPosition)
 
+		if self.favoritesChanged:
+			save_favorites(self.favorites_array)
+
 		for obj in [
 			self.clientConfig,
 			self.serversConfig,
 			self.unsentView,
 			self.additional,
+			self.favorites,
 			self.helpWindow,
 			self.clearXC,
 			self.clearCache,
-			self.clearMessages
+			self.clearMessages,
+			debugform
 		]:
 			obj.destroy()
-		debugform.destroy()
 		event.accept()
 
 class debugForm(QtWidgets.QDialog):
