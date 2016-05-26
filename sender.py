@@ -7,38 +7,35 @@ import urllib.parse
 import paths
 
 def sendMessages(proxy=None, error_callback=None):
-	files=os.listdir(paths.tossesdir)
-	files=[x[:-5] for x in files if x.endswith(".toss")]
-	files.sort()
-	
 	countsent=0
-	for file in files:
-		f=read_file(os.path.join(paths.tossesdir, file+".toss"))
-		
-		adress=servers[0]["adress"]
-		authstr=servers[0]["authstr"]
+	for server in servers:
+		namespace = server["outbox_storage_id"]
+		storage_path = os.path.join(paths.tossesdir, namespace)
 
-		for server in servers:
-			if(f.splitlines()[0] in server["echoareas"]):
-				adress=server["adress"]
-				authstr=server["authstr"]
-				break
-		
-		code=base64.b64encode(bytes(f, "utf8"))
-		
-		data = urllib.parse.urlencode({'tmsg': code,'pauth': authstr}).encode("utf8")
-		print(adress)
+		files = scanForTosses(storage_path)
+		if len(files) == 0:
+			continue
 
-		out = network.getfile(adress + 'u/point', proxy, data)
-		print(out)
-		
-		if out.startswith('msg ok'):
-			countsent+=1
-			one=os.path.join(paths.tossesdir, file+".toss")
-			two=os.path.join(paths.tossesdir, file+".out")
+		adress=server["adress"]
+		authstr=server["authstr"]
 
-			os.rename(one, two)
-		else:
-			if (error_callback != None):
-				error_callback(file, out)
+		for file in files:
+			toss_path = os.path.join(storage_path, file + ".toss")
+			f=read_file(toss_path)
+			code=base64.b64encode(bytes(f, "utf8"))
+
+			params = {'tmsg': code,'pauth': authstr}
+			data = urllib.parse.urlencode(params).encode("utf8")
+			print(adress)
+
+			out = network.getfile(adress + 'u/point', proxy, data)
+			print(out)
+
+			if out.startswith('msg ok'):
+				countsent+=1
+				one=os.path.join(storage_path, file+".toss")
+				two=os.path.join(storage_path, file+".out")
+				os.rename(one, two)
+			elif (error_callback != None):
+				error_callback(toss_path, out)
 	return countsent

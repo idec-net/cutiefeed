@@ -10,9 +10,9 @@ from socks import socks_proxy_context
 def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False):
 	if (not quiet):
 		print("fetch "+file)
-	
+
 	p = None
-	
+
 	if proxy == None:
 		if (urllib.request._opener != None):
 			urllib.request.install_opener(None)
@@ -24,13 +24,13 @@ def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False):
 		keys=proxy["socks"].split(":")
 		url=keys[0]
 		port=int(keys[1])
-		
+
 		with socks_proxy_context.socks_proxy_context(proxy_address=(url, port)):
 			p = urllib.request.urlopen(file, data, timeout=20.0)
-	
+
 	if not p:
 		p = urllib.request.urlopen(file, data, timeout=15.0)
-	
+
 	if return_descriptor:
 		return p
 	else:

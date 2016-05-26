@@ -14,13 +14,25 @@ import webbrowser
 from threading import Thread
 import ctypes
 import queue
-import json, shutil, math
+import json, shutil, math, uuid
 import urllib.parse
 
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
 commenttemplate=re.compile(r"(^|(\w\s+))(PS|P\.S|ЗЫ|З\.Ы|\/\/|#)(.+$)", re.MULTILINE | re.IGNORECASE)
 ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
+
+def outbox_id_by_address(addr):
+	for server in config["servers"]:
+		if server["adress"] == addr:
+			return server["outbox_storage_id"]
+	return None
+
+def outbox_id_by_echoarea(echoarea):
+	for server in config["servers"]:
+		if echoarea in server:
+			return server["outbox_storage_id"]
+	return None
 
 def getproxy():
 	proxy=None
@@ -157,15 +169,18 @@ def lbselect():
 	updatemsg()
 
 def c_writeNew(event):
-	global echo
-	writemsg.writeNew(echo)
+	global echo, curr_outbox_id
+	writemsg.writeNew(echo, curr_outbox_id)
+
+def answer(event):
+	global msgid_answer, curr_outbox_id
+	writemsg.answer(msgid_answer, curr_outbox_id)
 
 def sendWrote_operation():
 	countsent=0
 
 	def errorCb(tossfile, error):
-		form.errorsq.put(["Ошибка ноды при отправке "+tossfile+".toss: ", error])
-		# эта функция вызывается, если происходит ошибка на ноде
+		form.errorsq.put(["Ошибка ноды при отправке "+tossfile+": ", error])
 
 	try:
 		countsent=sender.sendMessages(getproxy(), errorCb)
@@ -181,10 +196,6 @@ def sendWrote(event):
 
 	if (not isinstance(result, Exception)):
 		mbox("Отправлено сообщений: "+str(result))
-
-def answer(event):
-	global echo,msgid_answer
-	writemsg.answer(echo, msgid_answer)
 
 def setUIResize(filename, object):
 	# данный метод чинит изменение размера окна
@@ -251,6 +262,7 @@ def reparseMessage(string):
 	return "<br />".join(strings)
 
 def openLink(link):
+	global curr_outbox_id
 	link=link.toString()
 
 	if (link.startswith("#")): # если перед нами ii-ссылка
@@ -265,12 +277,14 @@ def openLink(link):
 
 		if word == "ii":
 			if "." in link:
-				form.viewwindow(link) # переходим в эху
+				curr_outbox_id = outbox_id_by_echoarea(link)
+				form.viewwindow(link, curr_outbox_id) # идём в эху
 			else:
 				form.openMessageView(link) # смотрим сообщение
 		elif word == "answer": # отвечаем на msgid
-			msg=getMsg(link)
-			writemsg.answer(msg.get("echo"), link)
+			if not curr_outbox_id:
+				curr_outbox_id = config["servers"][0]["outbox_storage_id"]
+			writemsg.answer(link, curr_outbox_id)
 
 	else:
 		print("opening link in default browser")
@@ -347,9 +361,10 @@ class Form(QtWidgets.QMainWindow):
 		self.listWidget.itemActivated.connect(self.openViewWindow)
 		self.loadEchoList()
 
-	def viewwindow(self, echoarea):
-		global msglist,msgnumber,listlen,echo
+	def viewwindow(self, echoarea, outbox_id):
+		global msglist,msgnumber,listlen,echo,curr_outbox_id
 		echo=echoarea
+		curr_outbox_id=outbox_id
 
 		setUIResize("qtgui-files/viewwindow.ui",self)
 
@@ -566,15 +581,14 @@ class Form(QtWidgets.QMainWindow):
 		counter=0
 
 		if answer == QtWidgets.QMessageBox.Yes:
-			if self.deleteAll.isChecked():
-				for filename in os.listdir(paths.tossesdir):
-					counter+=1
-					delete(os.path.join(paths.tossesdir, filename))
-			else:
-				for filename in os.listdir(paths.tossesdir):
-					if filename[-5:]==".toss":
+			for server in config["servers"]:
+				outbox_id = server["outbox_storage_id"]
+				path = os.path.join(paths.tossesdir, outbox_id)
+
+				for filename in os.listdir(path):
+					if self.deleteAll.isChecked() or filename[-5:] == ".toss":
 						counter+=1
-						delete(os.path.join(paths.tossesdir, filename))
+						delete(os.path.join(path, filename))
 
 			if counter>0:
 				mbox("Удалено сообщений: "+str(counter))
@@ -742,11 +756,13 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.accepted.connect(self.applyServersConfigFromButton)
 
 	def setupUnsentView(self):
-		def updateView(filename):
-			if filename == "": # например, если мы удалили последнее
+		# TODO: проработать под новую ситуацию
+		def updateView(item):
+			if item == None: # например, если мы удалили последнее
 				self.unsentView.textBrowser.clear()
 				return
 
+			filename = item.data(QtCore.Qt.UserRole)
 			s=getOutMsgEscape(filename)
 			repto=s.get("repto") or "-"
 
@@ -772,15 +788,15 @@ class Form(QtWidgets.QMainWindow):
 		def edit():
 			item=self.unsentView.listWidget.currentItem()
 			if item != None:
-				filename=item.text()
-				writemsg.openEditor(paths.tossesdir+filename)
+				filename=item.data(QtCore.Qt.UserRole)
+				writemsg.openEditor(filename)
 
 		def deleteFile():
 			msgnumber=self.unsentView.listWidget.currentRow()
 			item=self.unsentView.listWidget.takeItem(msgnumber)
 			if item != None:
-				filename=item.text()
-				delete(os.path.join(paths.tossesdir, filename))
+				filename=item.data(QtCore.Qt.UserRole)
+				delete(filename)
 
 		def delTosses():
 			self.deleteTosses()
@@ -795,7 +811,7 @@ class Form(QtWidgets.QMainWindow):
 		self.unsentView.pushButton_6.clicked.connect(edit)
 		self.unsentView.pushButton_7.clicked.connect(self.loadUnsentView)
 		self.unsentView.textBrowser.anchorClicked.connect(openLink)
-		self.unsentView.listWidget.currentTextChanged.connect(updateView)
+		self.unsentView.listWidget.currentItemChanged.connect(updateView)
 
 	def setupAdditional(self):
 		self.additional=uic.loadUi("qtgui-files/additional.ui")
@@ -869,7 +885,7 @@ class Form(QtWidgets.QMainWindow):
 		def loader(self):
 			try:
 				print("get file list")
-				files=getOutList()
+				files=getOutList(config["servers"])
 				for msg in files:
 					self.newmsgq.put(msg)
 			except Exception as e:
@@ -886,7 +902,12 @@ class Form(QtWidgets.QMainWindow):
 			if (queueFull or threadAlive):
 				if (queueFull):
 					element=self.newmsgq.get(timeout=5)
-					self.unsentView.listWidget.insertItem(0, element)
+					list_item=QtWidgets.QListWidgetItem(self.unsentView.listWidget)
+					list_item.setText(element[-20:])
+					list_item.setToolTip(element)
+					list_item.setData(QtCore.Qt.UserRole, element)
+
+					self.unsentView.listWidget.insertItem(0, list_item)
 			else:
 				break
 		if self.unsentView.listWidget.count() == 0:
@@ -1139,17 +1160,38 @@ class Form(QtWidgets.QMainWindow):
 	def tabAddRequest(self):
 		servers.append(defaultServersValues)
 		newindex=self.serversConfig.tabBar.addTab(str(len(servers)))
+		servers[newindex]["outbox_storage_id"] = uuid.uuid4().hex
 		self.serversConfig.tabBar.setCurrentIndex(newindex)
 
 	def tabDeleteRequest(self):
 		currindex=self.serversConfig.tabBar.currentIndex()
+
+		path = os.path.join(paths.tossesdir, servers[currindex]["outbox_storage_id"])
+		if os.path.exists(path):
+			outbox = os.listdir(path)
+
+			if len(outbox) > 0:
+				dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Подтверждение", "В каталоге "+path+" остались исходящие сообщения ("+str(len(outbox))+"), принадлежащие этой станции. Удалить их тоже?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
+				answer = dialog.exec_()
+
+				if answer == QtWidgets.QMessageBox.Yes:
+					for file in outbox:
+						delete(os.path.join(path, file))
+					os.rmdir(path)
+				elif answer == QtWidgets.QMessageBox.Cancel:
+					return
+
+			else:
+				os.rmdir(path)
+
 		self.serversConfig.tabBar.removeTab(currindex)
 		del servers[currindex]
 		self.loadInfo_servers(self.serversConfig.tabBar.currentIndex())
 
 	def openViewWindow(self, item):
-		echoarea=item.text()
-		self.viewwindow(echoarea)
+		echoarea = item.text()
+		outbox_id = outbox_id_by_address(self.comboBox.currentText())
+		self.viewwindow(echoarea, outbox_id)
 
 	def displayOfflineEchos(self):
 		self.listWidget.clear()

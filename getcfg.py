@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json, os, paths
+import json, os, paths, uuid
 
 if (not os.path.exists(paths.configfile) and os.path.exists(paths.configfile_default)):
 	import shutil
@@ -38,6 +38,7 @@ defaultServersValues={
 	"adress": "http://ii-net.tk/ii/ii-point.php?q=/",
 	"authstr": "",
 	"echoareas": ["ii.test.14", "mlp.15"],
+	"outbox_storage_id": False,
 	"fetch_enabled": True,
 	"xcenable": True,
 	"advancedue": True,
@@ -56,8 +57,6 @@ for server in config["servers"]:
 			config["servers"][i][key]=defaultServersValues[key]
 	i+=1
 
-print("Config loaded")
-
 def saveConfig():
 	try:
 		configFile=open(paths.configfile, "w")
@@ -72,3 +71,21 @@ for directory in [paths.datadir, paths.indexdir, paths.msgdir, paths.tossesdir, 
 	if not os.path.exists(directory):
 		print("Directory "+directory+" does not exist. Creating...")
 		os.makedirs(directory)
+
+# Дальше идёт проверка на идентификатор станции на хранение исходящих.
+# Если его нет (например, при миграции со старых версий),
+# то скрипт генерирует его и пересохраняет конфиг
+
+i=0
+need_to_save = False
+for server in config["servers"]:
+	if not server["outbox_storage_id"]:
+		config["servers"][i]["outbox_storage_id"] = uuid.uuid4().hex
+		need_to_save = True
+	i+=1
+
+if need_to_save:
+	print("There are new stations without outbox id; saving config...")
+	saveConfig()
+
+print("Config loaded")

@@ -35,10 +35,10 @@ def getMsgEscape(msgid): # получаем сообщение и режем htm
 	
 	return m
 
-def getOutMsg(name):
+def getOutMsg(filename):
 	try:
-		source=read_file(paths.tossesdir+name).splitlines()
-		
+		source=read_file(filename).splitlines()
+
 		str=source[4]
 		if str.startswith("@repto:"):
 			repto=str[7:]
@@ -52,22 +52,44 @@ def getOutMsg(name):
 		meta=dict(echo="", to="All", subj="", repto=False, msg="")
 	return meta
 
-def getOutMsgEscape(name): # получаем сообщение и режем html в нужных частях
-	m=getOutMsg(name)
+def getOutMsgEscape(filename): # получаем сообщение и режем html в нужных частях
+	m=getOutMsg(filename)
 	values=["echo", "to", "subj", "repto", "msg"]
 	for value in values:
 		if (type(m[value]) == bool): # для repto
 			continue
 
 		m[value]=cgi.escape(m[value], True)
-	
+
 	return m
 
-def getOutList():
-	files=os.listdir(paths.tossesdir)
-	files=[x for x in files if x.endswith(".toss") or x.endswith(".out")]
-	files.sort(key=lambda x: int(x.strip(".toss").strip(".out")))
+def getOutList(servers):
+	files = []
+	for server in servers:
+		target_dir = os.path.join(paths.tossesdir, server["outbox_storage_id"])
+		contents=[x for x in os.listdir(target_dir) if x.endswith(".toss") or x.endswith(".out")]
+		contents.sort(key=lambda x: int(x.strip(".toss").strip(".out")))
+		files+=[os.path.join(target_dir, x) for x in contents]
 	return files
+
+def outboxFromPath(path):
+	if not os.path.exists(path):
+		os.makedirs(path)
+	tossdir_files=[i for i in os.listdir(path) if i.endswith(".out") or i.endswith(".toss")]
+	tosses=[int(i.strip(".toss").strip(".out")) for i in tossdir_files]
+	return sorted(tosses)
+
+def scanForTosses(directory):
+	files=os.listdir(directory)
+	tosses=[x[:-5] for x in files if x.endswith(".toss")]
+	return sorted(tosses)
+
+def newTossName(outbox):
+	if len(outbox) == 0:
+		outbox.append(0)
+	lasttoss = outbox[len(outbox) - 1] + 1
+	outbox.append(lasttoss)
+	return outbox, lasttoss
 
 def b64d(str):
 	return base64.b64decode(str)

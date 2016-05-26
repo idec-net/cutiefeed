@@ -9,6 +9,7 @@
 				"lor-opennet.15",
 				"mlp.15"
 			],
+			"outbox_storage_id": "mira",
 			"fetch_enabled":true,
 			"xcenable":true,
 			"advancedue":true,
@@ -22,6 +23,7 @@
 				"spline.creepy.14",
 				"spline.local.14"
 			],
+			"outbox_storage_id": "station13",
 			"fetch_enabled":true,
 			"xcenable":false,
 			"advancedue":false,
