@@ -1019,11 +1019,15 @@ class Form(QtWidgets.QMainWindow):
 		checked = self.checkBox.isChecked()
 
 		if not checked:
+			if msgid_answer not in self.favorites_array["list"]:
+				return
 			del self.favorites_array["subjes"][msgid_answer]
 			self.favorites_array["list"].remove(msgid_answer)
 		else:
-			subj = self.listWidget.currentItem().text()
-			self.favorites_array["subjes"][msgid_answer]=subj
+			item = self.listWidget.currentItem()
+			if item == None:
+				return
+			self.favorites_array["subjes"][msgid_answer]=item.text()
 			self.favorites_array["list"].append(msgid_answer)
 
 	def additional_update_echoes(self):
