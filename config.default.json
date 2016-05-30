@@ -1,7 +1,7 @@
 {
 	"servers": [
 		{
-			"adress": "http://ii-net.tk/ii/ii-point.php?q=/",
+			"adress": "https://ii-net.tk/ii/ii-point.php?q=/",
 			"authstr": "",
 			"echoareas": [
 				"pipe.2032",
