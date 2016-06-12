@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
-    <height>464</height>
+    <width>515</width>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -123,6 +123,13 @@
     <widget class="QCheckBox" name="checkBox_2">
      <property name="text">
       <string>Показать диалог настроек при следующем запуске</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkBox_6">
+     <property name="text">
+      <string>Разворачивать клиент на весь экран при запуске</string>
      </property>
     </widget>
    </item>

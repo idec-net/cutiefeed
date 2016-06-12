@@ -220,9 +220,7 @@ def sendWrote(event):
 		mbox("Отправлено сообщений: "+str(result))
 
 def setUIResize(filename, object):
-	# данный метод чинит изменение размера окна
-	# в тайловых оконных менеджерах
-	# в qt4 это не нужно было, а в 5 нужно
+	# подгрузка интерфейса с учётом предыдущего размера окна
 	currentsize=object.size()
 	uic.loadUi(filename,object)
 	object.resize(currentsize) # восстанавливаем предыдущий размер
@@ -365,7 +363,11 @@ class Form(QtWidgets.QMainWindow):
 				self.saveChanges()
 
 		self.mainwindow()
-		self.resize(980, 452) # фикс в тайловых WM по-умолчанию
+
+		if config["maximized"]:
+			self.setWindowState(QtCore.Qt.WindowMaximized)
+		else:
+			self.resize(980, 452)
 
 	def mainwindow(self):
 		setUIResize("qtgui-files/mainwindow.ui",self)
@@ -920,6 +922,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clientConfig.checkBox_3.setChecked(config["autoSaveChanges"])
 		self.clientConfig.checkBox_4.setChecked(config["useProxy"])
 		self.clientConfig.checkBox_5.setChecked(config["rememberEchoPosition"])
+		self.clientConfig.checkBox_6.setChecked(config["maximized"])
 
 		self.clientConfig.spinBox.setValue(config["oneRequestLimit"])
 
@@ -1077,6 +1080,7 @@ class Form(QtWidgets.QMainWindow):
 		config["autoSaveChanges"]=self.clientConfig.checkBox_3.isChecked()
 		config["useProxy"]=self.clientConfig.checkBox_4.isChecked()
 		config["rememberEchoPosition"]=self.clientConfig.checkBox_5.isChecked()
+		config["maximized"]=self.clientConfig.checkBox_6.isChecked()
 		config["oneRequestLimit"]=self.clientConfig.spinBox.value()
 
 		config["offline-echoareas"]=[]

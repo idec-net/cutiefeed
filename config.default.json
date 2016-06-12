@@ -40,6 +40,7 @@
 	"proxyType": "http",
 	"defaultEditor": true,
 	"firstrun": true,
+	"maximized": false,
 	"autoSaveChanges": true,
 	"useProxy": false,
 	"rememberEchoPosition": true,

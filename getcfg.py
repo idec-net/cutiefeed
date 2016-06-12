@@ -28,6 +28,7 @@ defaultValues={
 	"proxyType": "http",
 	"defaultEditor": False,
 	"firstrun": True,
+        "maximized": False,
 	"autoSaveChanges": True,
 	"useProxy": False,
 	"rememberEchoPosition": True,
