@@ -14,7 +14,8 @@
 			"xcenable":true,
 			"advancedue":true,
 			"pervasiveue": false,
-			"uelimit":200
+			"uelimit":200,
+			"cut_remote_index": 0
 		},
 		{
 			"adress": "http://spline.rooker.ru/ii/ii-point.php?q=/",
@@ -28,7 +29,8 @@
 			"xcenable":false,
 			"advancedue":false,
 			"pervasiveue": false,
-			"uelimit":100
+			"uelimit":100,
+			"cut_remote_index": 0
 		}
 	],
 	"offline-echoareas": [

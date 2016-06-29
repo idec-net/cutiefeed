@@ -173,10 +173,29 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="0">
          <widget class="QPushButton" name="pushButton_5">
           <property name="text">
            <string>Получить список эх с ноды</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если используется сервер без поддержки расширенного /u/e, то настройка гарантирует, что будет получено не более N сообщений.&lt;/p&gt;
+
+&lt;p&gt;К примеру, в эхе 10 000 сообщений. В поле указываете 50. При первом скачивании клиент скачает не всю эху, а только последние 50 сообщений. В дальнейшем он не будет скачивать больше 50, даже если сервер подсунет более объёмный индекс.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Принудительная обрезка индекса (0 - выключено):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="spinBox_2">
+          <property name="maximum">
+           <number>40000</number>
           </property>
          </widget>
         </item>

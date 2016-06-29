@@ -533,7 +533,7 @@ class Form(QtWidgets.QMainWindow):
 					# uelimit - сколько msgid скачивать максимум при наличии расширенной схемы
 					# если стоит в False, то скачиваем все
 
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, one_request_limit=config["oneRequestLimit"], proxy=proxy_config, pervasive_ue=server["pervasiveue"], callback=fx)
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, one_request_limit=config["oneRequestLimit"], proxy=proxy_config, pervasive_ue=server["pervasiveue"], callback=fx, cut_remote_index=server["cut_remote_index"])
 			except stoppedDownloadException:
 				break
 			except Exception as e:
@@ -942,6 +942,7 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.checkBox_3.setChecked(curr["pervasiveue"])
 		self.serversConfig.checkBox_4.setChecked(curr["fetch_enabled"])
 		self.serversConfig.spinBox.setValue(curr["uelimit"])
+		self.serversConfig.spinBox_2.setValue(curr["cut_remote_index"])
 
 		is_ue_enabled=curr["advancedue"]
 		self.serversConfig.checkBox_3.setEnabled(is_ue_enabled)
@@ -1099,6 +1100,7 @@ class Form(QtWidgets.QMainWindow):
 		servers[index]["pervasiveue"]=self.serversConfig.checkBox_3.isChecked()
 		servers[index]["fetch_enabled"]=self.serversConfig.checkBox_4.isChecked()
 		servers[index]["uelimit"]=self.serversConfig.spinBox.value()
+		servers[index]["cut_remote_index"]=self.serversConfig.spinBox_2.value()
 
 		servers[index]["echoareas"]=[]
 		count=self.serversConfig.listWidget.count()

@@ -28,7 +28,7 @@ defaultValues={
 	"proxyType": "http",
 	"defaultEditor": False,
 	"firstrun": True,
-        "maximized": False,
+	"maximized": False,
 	"autoSaveChanges": True,
 	"useProxy": False,
 	"rememberEchoPosition": True,
@@ -44,7 +44,8 @@ defaultServersValues={
 	"xcenable": True,
 	"advancedue": True,
 	"pervasiveue": False,
-	"uelimit": 200
+	"uelimit": 200,
+	"cut_remote_index": 0
 }
 
 for key in defaultValues.keys():
