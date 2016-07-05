@@ -304,7 +304,10 @@ def openLink(link):
 		elif word == "answer": # отвечаем на msgid
 			if not curr_outbox_id:
 				curr_outbox_id = config["servers"][0]["outbox_storage_id"]
-			writemsg.answer(link, curr_outbox_id)
+				writemsg.answer(link, curr_outbox_id)
+				curr_outbox_id = None
+			else:
+				writemsg.answer(link, curr_outbox_id)
 
 	else:
 		print("opening link in default browser")
@@ -438,6 +441,9 @@ class Form(QtWidgets.QMainWindow):
 		self.pushButton_2.clicked.connect(self.mainwindow)
 		self.newMsgTextBrowser.setParent(self)
 		self.verticalLayout.addWidget(self.newMsgTextBrowser)
+
+		global curr_outbox_id
+		curr_outbox_id = None # для открытия ii-ссылок для ответа на сообщения
 
 	def processNewThread(self, function, args=[], takeResult=True):
 		if self.networkingThread.isAlive():
