@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>524</width>
-    <height>551</height>
+    <width>547</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,6 +196,16 @@
          <widget class="QSpinBox" name="spinBox_2">
           <property name="maximum">
            <number>40000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton_6">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Клиент попытается &amp;quot;расставить нужные галочки&amp;quot; в этой вкладке самостоятельно.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Настроить всё автоматически</string>
           </property>
          </widget>
         </item>

@@ -44,7 +44,7 @@ defaultServersValues={
 	"xcenable": True,
 	"advancedue": True,
 	"pervasiveue": False,
-	"uelimit": 200,
+	"uelimit": 50,
 	"cut_remote_index": 0
 }
 

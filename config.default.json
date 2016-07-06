@@ -14,7 +14,7 @@
 			"xcenable":true,
 			"advancedue":true,
 			"pervasiveue": false,
-			"uelimit":200,
+			"uelimit":60,
 			"cut_remote_index": 0
 		},
 		{
@@ -29,7 +29,7 @@
 			"xcenable":false,
 			"advancedue":false,
 			"pervasiveue": false,
-			"uelimit":100,
+			"uelimit":50,
 			"cut_remote_index": 0
 		}
 	],

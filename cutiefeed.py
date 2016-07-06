@@ -788,6 +788,7 @@ class Form(QtWidgets.QMainWindow):
 		self.serversConfig.pushButton_3.clicked.connect(itemUp) # кнопка Вверх
 		self.serversConfig.pushButton_4.clicked.connect(itemDown) # кнопка Вниз
 		self.serversConfig.pushButton_5.clicked.connect(self.load_list_txt) # получение списка эх с ноды
+		self.serversConfig.pushButton_6.clicked.connect(self.x_features_autoConfig) # автонастройка
 
 		self.serversConfig.addTabButton.clicked.connect(self.tabAddRequest)
 		self.serversConfig.deleteTabButton.clicked.connect(self.tabDeleteRequest)
@@ -1240,6 +1241,35 @@ class Form(QtWidgets.QMainWindow):
 		text=prettier_size(self.additional.count)+self.additional.total
 		self.additional.label_7.setText(text)
 		print(text)
+
+	def x_features_autoConfig(self):
+		nodeAdress=self.serversConfig.lineEdit.text()
+
+		if not nodeAdress.endswith("/"):
+			# Беспечный пользователь забыл слэш в конце адреса ноды
+			# Проставляем за него
+			mbox("В конце адреса станции должен стоять слэш \"/\". Запомни это на будущее.")
+			nodeAdress+="/"
+			self.serversConfig.lineEdit.setText(nodeAdress)
+
+		raw_data=load_raw_file(nodeAdress+"x/features")
+		if raw_data is None or raw_data is "":
+			mbox("Станция не поддерживает автонастройку, либо проблемы с интернетом. Ставим минимально рабочую конфигурацию.")
+
+		features=raw_data.splitlines()
+
+		self.serversConfig.checkBox.setChecked("x/c" in features)
+		self.serversConfig.checkBox_2.setChecked("u/e" in features)
+
+		if "u/e" in features:
+			self.serversConfig.checkBox_3.setChecked(False)
+			self.serversConfig.spinBox.setValue(defaultServersValues["uelimit"])
+			self.serversConfig.spinBox_2.setValue(0)
+		else:
+			self.serversConfig.spinBox_2.setValue(50)
+
+		if "list.txt" in features:
+			self.load_list_txt()
 
 	def applyServersConfigFromButton(self):
 		curr=self.serversConfig.tabBar.currentIndex()
