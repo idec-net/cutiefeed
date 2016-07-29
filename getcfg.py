@@ -36,7 +36,7 @@ defaultValues={
 }
 
 defaultServersValues={
-	"adress": "http://ii-net.tk/ii/ii-point.php?q=/",
+	"adress": "https://ii-net.tk/ii/ii-point.php?q=/",
 	"authstr": "",
 	"echoareas": ["ii.test.14", "mlp.15"],
 	"outbox_storage_id": False,
