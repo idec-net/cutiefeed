@@ -18,10 +18,10 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, from_msgid=False, proxy=None, pervasive_ue=False, callback=None, cut_remote_index=0):
-	if(len(firstEchoesToFetch)==0):
+def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, proxy=None, pervasive_ue=False, callback=None, cut_remote_index=0):
+	if len(firstEchoesToFetch)==0:
 		return []
-	if(xcenable):
+	if xcenable:
 		xcfile=os.path.join(paths.datadir, "base-"+hsh(adress))
 		donot=[]
 		try:
@@ -34,7 +34,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 			remotexcget=network.getfile(adress+"x/c/"+"/".join(firstEchoesToFetch), proxy)
 			remotexc=[x.split(":") for x in remotexcget.splitlines()]
 
-			if(len(f)==len(remotexc)):
+			if len(f) == len(remotexc):
 				xcdict={}
 				for x in remotexc:
 					xcdict[x[0]]=int(x[1])
@@ -43,9 +43,27 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 					localdict[x[0]]=int(x[1])
 
 				for echo in firstEchoesToFetch:
-					if int(xcdict[echo])==int(localdict[echo]):
+					remote_ts = int(xcdict[echo])
+					local_ts = int(localdict[echo])
+
+					if remote_ts == local_ts:
 						donot.append(echo)
 						print("removed "+echo)
+					elif remote_ts > local_ts:
+						# этот хак требуется, чтобы избежать
+						# возможной маловероятной потери сообщений при
+						# работе расширенного /u/e и нескольких станциях
+
+						# если количество новых сообщений эхи превышает
+						# fetch_limit, то этот лимит сам увеличивается,
+						# подстраиваясь до нужного значения
+
+						if remote_ts <= 0 or local_ts <=0:
+							continue
+						residual = remote_ts - local_ts
+
+						if fetch_limit and pervasive_ue and (residual > fetch_limit):
+							fetch_limit = residual
 
 			open(xcfile, "w").write(remotexcget)
 
