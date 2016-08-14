@@ -303,9 +303,14 @@ def openLink(link):
 				form.openMessageView(link) # смотрим сообщение
 		elif word == "answer": # отвечаем на msgid
 			if not curr_outbox_id:
-				curr_outbox_id = config["servers"][0]["outbox_storage_id"]
-				writemsg.answer(link, curr_outbox_id)
-				curr_outbox_id = None
+				target_outbox_id = outbox_id_by_echoarea(getMsg(link).get("echo"))
+
+				if target_outbox_id is not None:
+					writemsg.answer(link, target_outbox_id)
+				else:
+					curr_outbox_id = config["servers"][0]["outbox_storage_id"]
+					writemsg.answer(link, curr_outbox_id)
+					curr_outbox_id = None
 			else:
 				writemsg.answer(link, curr_outbox_id)
 
@@ -539,7 +544,7 @@ class Form(QtWidgets.QMainWindow):
 					# uelimit - сколько msgid скачивать максимум при наличии расширенной схемы
 					# если стоит в False, то скачиваем все
 
-				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, one_request_limit=config["oneRequestLimit"], proxy=proxy_config, pervasive_ue=server["pervasiveue"], callback=fx, cut_remote_index=server["cut_remote_index"])
+				msgidsNew=webfetch.fetch_messages(server["adress"], server["echoareas"], server["xcenable"], fetch_limit=uelimit, one_request_limit=config["oneRequestLimit"], proxy=proxy_config, pervasive_ue=server["pervasiveue"], callback=fx, cut_remote_index=server["cut_remote_index"], connTimeout=config["connectionTimeout"])
 			except stoppedDownloadException:
 				break
 			except Exception as e:
@@ -610,6 +615,9 @@ class Form(QtWidgets.QMainWindow):
 		if not self.gotMsgs:
 			self.newMsgTextBrowser.destroy()
 			mbox('Новых сообщений нет.')
+		else:
+			global curr_outbox_id
+			curr_outbox_id = None
 
 	def deleteTosses(self):
 		answer=self.clearMessages.exec_()
@@ -932,6 +940,7 @@ class Form(QtWidgets.QMainWindow):
 		self.clientConfig.checkBox_6.setChecked(config["maximized"])
 
 		self.clientConfig.spinBox.setValue(config["oneRequestLimit"])
+		self.clientConfig.spinBox_2.setValue(config["connectionTimeout"])
 
 	def loadInfo_servers(self, index=0):
 		curr=servers[index]
@@ -1090,6 +1099,7 @@ class Form(QtWidgets.QMainWindow):
 		config["rememberEchoPosition"]=self.clientConfig.checkBox_5.isChecked()
 		config["maximized"]=self.clientConfig.checkBox_6.isChecked()
 		config["oneRequestLimit"]=self.clientConfig.spinBox.value()
+		config["connectionTimeout"]=self.clientConfig.spinBox_2.value()
 
 		config["offline-echoareas"]=[]
 

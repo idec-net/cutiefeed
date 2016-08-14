@@ -18,7 +18,7 @@ def parseFullEchoList(echobundle):
 				echos2d[lastecho]=[]
 	return echos2d
 
-def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, proxy=None, pervasive_ue=False, callback=None, cut_remote_index=0):
+def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit=20, fetch_limit=False, proxy=None, pervasive_ue=False, callback=None, cut_remote_index=0, connTimeout=20):
 	if len(firstEchoesToFetch)==0:
 		return []
 	if xcenable:
@@ -31,7 +31,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 			open(xcfile, "w").write("\n".join([x+":0" for x in firstEchoesToFetch]))
 			f=False
 		if(f):
-			remotexcget=network.getfile(adress+"x/c/"+"/".join(firstEchoesToFetch), proxy)
+			remotexcget=network.getfile(adress+"x/c/"+"/".join(firstEchoesToFetch), proxy, timeout=connTimeout)
 			remotexc=[x.split(":") for x in remotexcget.splitlines()]
 
 			if len(f) == len(remotexc):
@@ -76,9 +76,9 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 
 	if (fetch_limit != False):
 		bottomOffset=fetch_limit
-		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(bottomOffset)+":"+str(fetch_limit), proxy)
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch)+"/-"+str(bottomOffset)+":"+str(fetch_limit), proxy, timeout=connTimeout)
 	else:
-		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch), proxy)
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(echoesToFetch), proxy, timeout=connTimeout)
 
 	localIndex={}
 
@@ -107,7 +107,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 	# и вот начинается магия
 	while (len(nextfetch) > 0):
 		bottomOffset+=fetch_limit
-		echoBundle=network.getfile(adress+"u/e/"+"/".join(nextfetch)+"/-"+str(bottomOffset)+":"+str(fetch_limit), proxy)
+		echoBundle=network.getfile(adress+"u/e/"+"/".join(nextfetch)+"/-"+str(bottomOffset)+":"+str(fetch_limit), proxy, timeout=connTimeout)
 		msgsDict=parseFullEchoList(echoBundle)
 
 		for echo in nextfetch:
@@ -145,7 +145,7 @@ def fetch_messages(adress, firstEchoesToFetch, xcenable=False, one_request_limit
 
 	for diff in difference2d:
 		impldifference="/".join(diff)
-		fullbundle=network.getfile(adress+"u/m/"+impldifference, proxy)
+		fullbundle=network.getfile(adress+"u/m/"+impldifference, proxy, timeout=connTimeout)
 
 		bundles=fullbundle.splitlines()
 		for bundle in bundles:

@@ -152,9 +152,6 @@
    </item>
    <item>
     <widget class="QFrame" name="frame_5">
-     <property name="toolTip">
-      <string>Предупреждаю: Лучше не ставить значение больше 60. Самое оптимальное - это 20.</string>
-     </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
@@ -170,6 +167,9 @@
       </property>
       <item row="0" column="0">
        <widget class="QLabel" name="label_4">
+        <property name="toolTip">
+         <string>Предупреждаю: Лучше не ставить значение больше 60. Самое оптимальное - это 20.</string>
+        </property>
         <property name="text">
          <string>Скачивать сообщений за один запрос:</string>
         </property>
@@ -183,11 +183,31 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Предупреждаю: Лучше не ставить значение больше 60. Самое оптимальное - это 20.</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
         <property name="maximum">
          <number>80</number>
+        </property>
+        <property name="value">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Таймаут сетевого соединения (в секундах):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spinBox_2">
+        <property name="minimum">
+         <number>1</number>
         </property>
         <property name="value">
          <number>20</number>

@@ -32,7 +32,8 @@ defaultValues={
 	"autoSaveChanges": True,
 	"useProxy": False,
 	"rememberEchoPosition": True,
-	"oneRequestLimit": 20
+	"oneRequestLimit": 20,
+	"connectionTimeout": 20
 }
 
 defaultServersValues={

@@ -7,7 +7,7 @@ import urllib.request
 
 from socks import socks_proxy_context
 
-def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False):
+def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False, timeout=20):
 	if (not quiet):
 		print("fetch "+file)
 
@@ -26,10 +26,10 @@ def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False):
 		port=int(keys[1])
 
 		with socks_proxy_context.socks_proxy_context(proxy_address=(url, port)):
-			p = urllib.request.urlopen(file, data, timeout=20.0)
+			p = urllib.request.urlopen(file, data, timeout)
 
 	if not p:
-		p = urllib.request.urlopen(file, data, timeout=15.0)
+		p = urllib.request.urlopen(file, data, timeout)
 
 	if return_descriptor:
 		return p
