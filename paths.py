@@ -12,6 +12,7 @@ msgdir=os.path.join(datadir, "msg/")
 tossesdir=os.path.join(datadir, "out/")
 subjcachedir=os.path.join(datadir, "subjcache/")
 echopositionfile=os.path.join(datadir, "positioncache.json")
+sessioncache=os.path.join(datadir, "sessioncache.json")
 favoritesfile=os.path.join(datadir, "favorites.json")
 blacklistfile=os.path.join(datadir, "blacklist.txt")
 

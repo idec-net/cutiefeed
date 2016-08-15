@@ -370,6 +370,15 @@ class Form(QtWidgets.QMainWindow):
 			if not config["autoSaveChanges"]:
 				self.saveChanges()
 
+		try:
+			f=open(paths.sessioncache)
+			self.sessionCache=json.load(f)
+			f.close()
+			self.currentStation = self.sessionCache["currentStation"]
+		except:
+			self.sessionCache={}
+			self.currentStation = 0
+
 		self.mainwindow()
 
 		if config["maximized"]:
@@ -393,9 +402,14 @@ class Form(QtWidgets.QMainWindow):
 		for server in servers:
 			self.comboBox.addItem(server["adress"])
 
+		if self.currentStation >= len(servers):
+			self.currentStation = 0
+
+		self.comboBox.setCurrentIndex(self.currentStation)
+		self.listWidget.addItems(servers[self.currentStation]["echoareas"])
+
 		self.comboBox.currentIndexChanged.connect(self.loadEchoList)
 		self.listWidget.itemActivated.connect(self.openViewWindow)
-		self.loadEchoList()
 
 	def viewwindow(self, echoarea, outbox_id):
 		global msglist,msgnumber,listlen,echo,curr_outbox_id
@@ -662,8 +676,14 @@ class Form(QtWidgets.QMainWindow):
 				delete(paths.echopositionfile)
 				counter+=1
 
+			if os.path.exists(paths.sessioncache):
+				delete(paths.sessioncache)
+				counter+=1
+
 			if self.echoPosition != None:
 				self.echoPosition=None
+
+			self.currentStation = 0
 
 			for filename in os.listdir(paths.subjcachedir):
 				delete(os.path.join(paths.subjcachedir, filename))
@@ -985,6 +1005,7 @@ class Form(QtWidgets.QMainWindow):
 			self.favorites.listWidget.insertItem(0, list_item)
 
 	def loadEchoList(self, index=0):
+		self.currentStation = index
 		self.listWidget.clear()
 		self.listWidget.addItems(servers[index]["echoareas"])
 
@@ -1025,13 +1046,13 @@ class Form(QtWidgets.QMainWindow):
 		return True
 
 	def updateMainView(self):
-		self.listWidget.clear()
 		index=self.comboBox.currentIndex()
-		self.listWidget.addItems(servers[index]["echoareas"])
 
 		self.comboBox.clear()
 		for server in servers:
 			self.comboBox.addItem(server["adress"])
+
+		self.comboBox.setCurrentIndex(index)
 
 	def favorites_toggle(self, state):
 		global msgid_answer
@@ -1397,6 +1418,14 @@ class Form(QtWidgets.QMainWindow):
 
 		if self.favoritesChanged:
 			save_favorites(self.favorites_array)
+
+		try:
+			self.sessionCache["currentStation"]=self.currentStation
+			f=open(paths.sessioncache, "w")
+			json.dump(self.sessionCache, f)
+			f.close()
+		except Exception as e:
+			print("Ошибка сохранения кэша сессии: "+str(e))
 
 		for obj in [
 			self.clientConfig,
