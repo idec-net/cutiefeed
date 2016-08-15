@@ -109,7 +109,7 @@ def append_subj_cache(subj_data, echo):
 def load_raw_file(adress, data=None):
 	def loadFunction():
 		try:
-			string=network.getfile(adress, getproxy(), data)
+			string=network.getfile(adress, getproxy(), data, timeout=config["connectionTimeout"])
 			form.newmsgq.put(string)
 		except Exception as e:
 			form.errorsq.put(["Ошибка скачивания: ", e])
@@ -124,7 +124,7 @@ def prettier_size(n,pow=0,b=1024,u='B',pre=['']+[p+'i'for p in'KMGTPEZY']):
 def xfile_download(server, filename, savename, signal):
 	data = urllib.parse.urlencode({'pauth': server["authstr"], 'filename':filename}).encode('utf8')
 	try:
-		out = network.getfile(server["adress"] + 'x/file', getproxy(), data, return_descriptor=True)
+		out = network.getfile(server["adress"] + 'x/file', getproxy(), data, return_descriptor=True, timeout=config["connectionTimeout"])
 	except Exception as e:
 		form.errorsq.put(["Ошибка скачивания: ", e])
 		form.newmsgq.put("Ну не получилось, чего поделаешь!")
