@@ -20,7 +20,7 @@ import urllib.parse
 urltemplate=re.compile("(https?|ftp|file)://?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 quotetemplate=re.compile(r"^\s?[\w_А-Яа-я\-]{0,20}(&gt;)+.+$", re.MULTILINE | re.IGNORECASE)
 commenttemplate=re.compile(r"(^|(\w\s+))(PS|P\.S|ЗЫ|З\.Ы|\/\/|#)(.+$)", re.MULTILINE | re.IGNORECASE)
-ii_link=re.compile(r"ii:\/\/(\w[\w.]+\w+)", re.MULTILINE)
+ii_link=re.compile(r"ii:\/\/(\w[\w.-]+\w+)", re.MULTILINE)
 
 def get_favorites():
 	try:
