@@ -1,0 +1,3 @@
+QPushButton::menu-indicator {
+	image: none;
+}
