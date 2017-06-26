@@ -128,7 +128,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../artwork/fileopen.svg</normaloff>../artwork/fileopen.svg</iconset>
+              <normaloff>../artwork/folder-open.svg</normaloff>../artwork/folder-open.svg</iconset>
             </property>
            </widget>
           </item>
@@ -182,7 +182,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../artwork/edit-clear.svg</normaloff>../artwork/edit-clear.svg</iconset>
+              <normaloff>../artwork/folder-remove.svg</normaloff>../artwork/folder-remove.svg</iconset>
             </property>
            </widget>
           </item>
@@ -376,7 +376,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../artwork/gtk-delete.svg</normaloff>../artwork/gtk-delete.svg</iconset>
+              <normaloff>../artwork/delete.svg</normaloff>../artwork/delete.svg</iconset>
             </property>
            </widget>
           </item>

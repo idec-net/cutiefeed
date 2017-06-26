@@ -119,6 +119,48 @@
              <number>0</number>
             </property>
             <item>
+             <widget class="QPushButton" name="pushButton_5">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Убрать</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/delete.svg</normaloff>../artwork/delete.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="shortcut">
+               <string>Del</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QPushButton" name="pushButton_2">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -132,11 +174,21 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="text">
-               <string>&lt;</string>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/previous.svg</normaloff>../artwork/previous.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Ctrl+P</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -154,31 +206,21 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="text">
-               <string>&gt;</string>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/next.svg</normaloff>../artwork/next.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Ctrl+N</string>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_5">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Убрать</string>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>../artwork/gtk-delete.svg</normaloff>../artwork/gtk-delete.svg</iconset>
-              </property>
-              <property name="shortcut">
-               <string>Del</string>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

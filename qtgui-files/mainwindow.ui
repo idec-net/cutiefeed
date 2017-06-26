@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
-    <height>452</height>
+    <width>580</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,18 @@
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QPushButton" name="menuButton">
         <property name="sizePolicy">
@@ -28,12 +40,15 @@
         <property name="toolTip">
          <string>Меню</string>
         </property>
-        <property name="text">
-         <string>Меню</string>
-        </property>
         <property name="icon">
          <iconset>
-          <normaloff>../artwork/document-properties.svg</normaloff>../artwork/document-properties.svg</iconset>
+          <normaloff>../artwork/menu.svg</normaloff>../artwork/menu.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="shortcut">
          <string>Alt+M</string>
@@ -44,9 +59,70 @@
        </widget>
       </item>
       <item>
+       <widget class="QComboBox" name="comboBox">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        </property>
+        <property name="minimumContentsLength">
+         <number>18</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Скачать сообщения</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../artwork/download.svg</normaloff>../artwork/download.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="shortcut">
+         <string>Alt+F</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton_2">
-        <property name="text">
-         <string>Отправить</string>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Отправить все сообщения</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../artwork/cloud-upload.svg</normaloff>../artwork/cloud-upload.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="shortcut">
          <string>Alt+S</string>
@@ -57,46 +133,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>Скачать сообщения</string>
-        </property>
-        <property name="shortcut">
-         <string>Alt+F</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Станция:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="comboBox"/>
-      </item>
-      <item>
        <widget class="QPushButton" name="pushButton_3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -104,11 +140,24 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text">
+        <property name="toolTip">
          <string>Offline-эхи</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../artwork/sync-off.svg</normaloff>../artwork/sync-off.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="shortcut">
          <string>Ctrl+O</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -125,10 +174,19 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../artwork/view-refresh.svg</normaloff>../artwork/view-refresh.svg</iconset>
+          <normaloff>../artwork/refresh.svg</normaloff>../artwork/refresh.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="shortcut">
          <string>Ctrl+R</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

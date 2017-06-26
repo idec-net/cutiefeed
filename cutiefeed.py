@@ -164,6 +164,7 @@ def updatemsg():
 
 	form.listWidget.setCurrentRow(msgnumber)
 	form.textBrowser.setHtml(msgtext+"<br />"+reparseMessage(msg.get('msg')))
+	form.label.setText( echo + "  |  " + str(echocount - msgnumber) + " из " + str(echocount))
 
 	if config["rememberEchoPosition"] and form.echoPosition != None:
 		form.echoPosition[echo]=echocount-msgnumber
@@ -326,7 +327,9 @@ class Form(QtWidgets.QMainWindow):
 		global msglist,msgnumber,listlen
 		super(Form, self).__init__()
 
-		windowIcon=QtGui.QIcon('artwork/cutiefeed.svg')
+		windowIcon = QtGui.QIcon('artwork/cutiefeed.svg')
+		stylesheet = read_file('qtgui-files/style.qss')
+		self.setStyleSheet(stylesheet)
 
 		self.newmsgq=queue.Queue()
 		self.errorsq=queue.Queue()
@@ -384,7 +387,7 @@ class Form(QtWidgets.QMainWindow):
 		if config["maximized"]:
 			self.setWindowState(QtCore.Qt.WindowMaximized)
 		else:
-			self.resize(980, 452)
+			self.resize(580, 452)
 
 	def mainwindow(self):
 		setUIResize("qtgui-files/mainwindow.ui",self)

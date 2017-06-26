@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>887</width>
-    <height>369</height>
+    <width>762</width>
+    <height>364</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,7 +131,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>621</width>
+             <width>532</width>
              <height>50</height>
             </rect>
            </property>
@@ -156,17 +156,46 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
-               <string>Обновить</string>
+              <property name="toolTip">
+               <string>Обновить список</string>
               </property>
               <property name="icon">
                <iconset>
-                <normaloff>../artwork/view-refresh.svg</normaloff>../artwork/view-refresh.svg</iconset>
+                <normaloff>../artwork/refresh.svg</normaloff>../artwork/refresh.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Ctrl+R</string>
               </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Исходящие</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_2">
@@ -182,11 +211,24 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="text">
-               <string>&lt;</string>
+              <property name="toolTip">
+               <string>Предыдущее</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/previous.svg</normaloff>../artwork/previous.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Ctrl+P</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -204,27 +246,53 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="text">
-               <string>&gt;</string>
+              <property name="toolTip">
+               <string>Следующее</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/next.svg</normaloff>../artwork/next.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Ctrl+N</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_6">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
-               <string>Правка</string>
+              <property name="toolTip">
+               <string>Править это сообщение в редакторе</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/create.svg</normaloff>../artwork/create.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Alt+E</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -236,11 +304,24 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
-               <string>Удалить</string>
+              <property name="toolTip">
+               <string>Удалить это сообщение</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/delete.svg</normaloff>../artwork/delete.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Del</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -252,11 +333,24 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
-               <string>Отправить</string>
+              <property name="toolTip">
+               <string>Отправить всё</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/cloud-upload.svg</normaloff>../artwork/cloud-upload.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Alt+S</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -268,11 +362,24 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
+              <property name="toolTip">
                <string>Удалить все</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../artwork/folder-remove.svg</normaloff>../artwork/folder-remove.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
               <property name="shortcut">
                <string>Ctrl+Backspace</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

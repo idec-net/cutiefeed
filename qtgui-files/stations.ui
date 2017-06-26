@@ -32,10 +32,19 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../artwork/filenew.svg</normaloff>../artwork/filenew.svg</iconset>
+         <normaloff>../artwork/folder-plus.svg</normaloff>../artwork/folder-plus.svg</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
        </property>
        <property name="shortcut">
         <string>Ctrl+T</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -52,10 +61,19 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../artwork/remove.svg</normaloff>../artwork/remove.svg</iconset>
+         <normaloff>../artwork/close.svg</normaloff>../artwork/close.svg</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
        </property>
        <property name="shortcut">
         <string>Ctrl+W</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
