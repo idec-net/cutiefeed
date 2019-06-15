@@ -18,4 +18,4 @@ CutieFeed
 ==============
 
 * lib-socks-proxy: https://github.com/polymorphm/lib-socks-proxy
-* Значки из проекта Clarity: https://github.com/jcubic/Clarity
+* Значки из проектов Google Material Icons (material.io) и Clarity: https://github.com/jcubic/Clarity

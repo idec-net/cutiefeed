@@ -1,0 +1,16 @@
+/home/user
+	.iicli-modular
+	.local/share/iicli-modular/
+		echo/
+		msg/
+		out/
+		base*
+/usr/share/iicli-modular/
+	python files and default config
+/usr/bin/
+	ii-client-qt
+	cutiefeed
+/usr/share/applications/
+	*desktop
+/usr/share/licenses/iicli-lite
+/usr/share/icons/hicolor/***
