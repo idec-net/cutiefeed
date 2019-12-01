@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-from socks import monkey_patch as socks_proxy_monkey_patch
+from socks_modified import monkey_patch as socks_proxy_monkey_patch
 socks_proxy_monkey_patch.monkey_patch()
 
 import urllib.request
 
-from socks import socks_proxy_context
+from socks_modified import socks_proxy_context
 
 def getfile(file, proxy=None, data=None, return_descriptor=False, quiet=False, timeout=20):
 	if (not quiet):
