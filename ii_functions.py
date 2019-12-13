@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, base64, subprocess, datetime, hashlib, cgi
+import os, base64, subprocess, datetime, hashlib, html
 import paths
 import blacklist_func
 
@@ -31,7 +31,7 @@ def getMsgEscape(msgid): # получаем сообщение и режем htm
 		if (type(m[value]) == bool): # если repto == False (для совместимости), ибо нельзя обрабатывать не строку
 			continue
 
-		m[value]=cgi.escape(m[value], True)
+		m[value]=html.escape(m[value], True)
 	
 	return m
 
@@ -59,7 +59,7 @@ def getOutMsgEscape(filename): # получаем сообщение и реже
 		if (type(m[value]) == bool): # для repto
 			continue
 
-		m[value]=cgi.escape(m[value], True)
+		m[value]=html.escape(m[value], True)
 
 	return m
 

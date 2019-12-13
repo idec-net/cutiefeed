@@ -468,7 +468,7 @@ class Form(QtWidgets.QMainWindow):
 		curr_outbox_id = None # для открытия ii-ссылок для ответа на сообщения
 
 	def processNewThread(self, function, args=[], takeResult=True):
-		if self.networkingThread.isAlive():
+		if self.networkingThread.is_alive():
 			return
 
 		debugform.appear()
@@ -477,7 +477,7 @@ class Form(QtWidgets.QMainWindow):
 		self.networkingThread.daemon=True
 		self.networkingThread.start()
 
-		while (self.networkingThread.isAlive()):
+		while (self.networkingThread.is_alive()):
 			if (not gprintq.empty()):
 				debugform.addText(gprintq.get())
 			app.processEvents()
@@ -529,7 +529,7 @@ class Form(QtWidgets.QMainWindow):
 			app.processEvents()
 
 			queueFull=(not self.loadviewq.empty())
-			threadAlive=self.loadViewThread.isAlive()
+			threadAlive=self.loadViewThread.is_alive()
 			if (queueFull or threadAlive):
 				if (queueFull):
 					element=self.loadviewq.get(timeout=5)
@@ -596,10 +596,10 @@ class Form(QtWidgets.QMainWindow):
 						htmlcode+="<hr /><br /><a href='#ii:"+echo+"'>"+echo+"</a><br />msgid: <a href='#answer:"+msgid+"'>"+msgid+"</a><br />"+formatDate(arr.get('time'))+"<br />"+subj+"<br /><b>"+arr.get('sender')+' ('+arr.get('addr')+') -> '+arr.get('to')+"</b><br /><br />"+reparseMessage(arr.get('msg'))
 					signal.emit(htmlcode)
 				else:
-					if not self.networkingThread.isAlive():
+					if not self.networkingThread.is_alive():
 						return
 
-		if self.networkingThread.isAlive() or self.updateTB.isAlive():
+		if self.networkingThread.is_alive() or self.updateTB.is_alive():
 			return
 
 		debugform.appear()
@@ -612,7 +612,7 @@ class Form(QtWidgets.QMainWindow):
 		self.updateTB.daemon=True
 		self.updateTB.start()
 
-		while (self.networkingThread.isAlive()):
+		while (self.networkingThread.is_alive()):
 			if self.gotMsgs and not self.windowFlag:
 				self.getDialog()
 				self.windowFlag=True
@@ -1029,7 +1029,7 @@ class Form(QtWidgets.QMainWindow):
 		self.unsentView.listWidget.clear()
 		while True:
 			queueFull=(not self.newmsgq.empty())
-			threadAlive=self.networkingThread.isAlive()
+			threadAlive=self.networkingThread.is_alive()
 			if (queueFull or threadAlive):
 				if (queueFull):
 					element=self.newmsgq.get(timeout=5)
@@ -1287,7 +1287,7 @@ class Form(QtWidgets.QMainWindow):
 			self.serversConfig.lineEdit.setText(nodeAdress)
 
 		raw_data=load_raw_file(nodeAdress+"x/features")
-		if raw_data is None or raw_data is "":
+		if raw_data == None or raw_data == "":
 			mbox("Станция не поддерживает автонастройку, либо проблемы с интернетом. Ставим минимально рабочую конфигурацию.")
 
 		features=raw_data.splitlines()
